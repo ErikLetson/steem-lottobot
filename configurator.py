@@ -7,6 +7,9 @@
 # |--Simple configuration tool for lottobot
 # |----Sets accounts, nodes, and WIF keys to be used by lottobot
 #
+# The configurator is light on error checking.
+# It's going to take your word for it.
+#
 ###
 
 import os

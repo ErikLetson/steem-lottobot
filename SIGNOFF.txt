@@ -1,0 +1,5 @@
+The undersigned release all their contributions to the Steem Lottobot project under the MIT license.
+
+*********************************************
+
+1. Erik Letson <hmagellan@tutamail.com>
