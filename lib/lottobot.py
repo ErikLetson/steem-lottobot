@@ -49,9 +49,6 @@ class Lottobot(object):
 
     def run(self):
 
-        #open file for output writing
-        outfile = open(self.output_file, 'at')
-
         while self.on:
 
             time.sleep(10)
@@ -71,6 +68,9 @@ class Lottobot(object):
             if not self.on:
 
                 break
+
+            #open file for output writing
+            outfile = open(self.output_file, 'at')
 
             outfile.write(str(time.ctime()) + "\n")
             outfile.write("Begin pass #" + str(self.check_pass) + " of lottery #" + str(self.lotto) + "\n")
@@ -194,8 +194,8 @@ class Lottobot(object):
 
                 outfile.write("Beginning lottery #" + str(self.lotto) + "\n\n")
 
-        #cleanup
-        outfile.close()                
+            #cleanup
+            outfile.close()           
 
     def choose_winner(self):
 
