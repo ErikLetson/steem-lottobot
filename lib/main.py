@@ -1,7 +1,7 @@
 from . import lottobot
 
-def Main():
+def Main(direc):
 
-    lb = lottobot.Lottobot()
+    lb = lottobot.Lottobot(direc)
 
     #lb.run()

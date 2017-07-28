@@ -1,16 +1,19 @@
 import piston, os, time, random
 
 _CONFIGPATH = os.path.join('data', 'config')
-_KILLPATH = os.path.join('data', 'kill')
+_KILLPATH = os.path.join(_REALPATH, 'data', 'kill')
 
 #make kill file if it does not exist
-open(_KILLPATH, 'w').close()
+#open(_KILLPATH, 'w').close()
 
 class Lottobot(object):
 
-    def __init__(self):
+    def __init__(self, directory):
 
-        with open(_CONFIGPATH, 'r') as cf:
+        self.config_path = os.path.join(directory, _CONFIGPATH)
+        self.kill_path = os.path.join(directory, _KILLPATH)
+
+        with open(self.config_path, 'r') as cf:
 
             ckeys = [x for x in cf.readlines()]
 
@@ -57,7 +60,7 @@ class Lottobot(object):
             time.sleep(10)
 
             #Check the kill file for an external kill command
-            with open(_KILLPATH, 'r') as kf:
+            with open(self.kill_path, 'r') as kf:
 
                 for line in kf.readlines():
 
