@@ -1,7 +1,7 @@
 import piston, os, time, random
 
 _CONFIGPATH = os.path.join('data', 'config')
-_KILLPATH = os.path.join(_REALPATH, 'data', 'kill')
+_KILLPATH = os.path.join('data', 'kill')
 
 #make kill file if it does not exist
 #open(_KILLPATH, 'w').close()
