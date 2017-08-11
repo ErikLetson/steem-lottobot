@@ -17,33 +17,17 @@ import os
 #variables
 conf_path = os.path.join("data", "config")
 cmd = ""
+acct = "None"
+node = "wss://steemd.steemit.com"
+outlog = os.path.join('data', 'out.log')
+winlog = os.path.join('data', 'winners.log')
+errlog = os.path.join('data', 'error.log')
+keys = []
 
-#Read default values from file (removing the newline char also)
-with open(conf_path, 'r') as config:
-    
-    acct = config.readline()
-    acct = acct[0:len(acct) - 1]
-    
-    node = config.readline()
-    node = node[0:len(node) - 1]
+################################################################################
+################################################################################
 
-    outlog = config.readline()
-    outlog = outlog[0:len(outlog) - 1]
-
-    winlog = config.readline()
-    winlog = winlog[0:len(winlog) - 1]
-
-    errlog = config.readline()
-    errlog = errlog[0:len(errlog) - 1]
-
-    line = config.readline()
-    keys = []
-
-    while line != "" and line != '\n':
-        
-        keys.append(line[0:len(line) - 1])
-
-        line = config.readline()
+#function definitions
 
 #function to write to config file
 def write_to_config():
@@ -59,6 +43,66 @@ def write_to_config():
         for k in keys:
 
             f.write(str(k) + '\n')
+
+################################################################################
+################################################################################
+
+#Default settings
+
+#Read default values from file if it exists (removing the newline char also)
+try:
+    
+    with open(conf_path, 'r') as config:
+    
+        acct = config.readline()
+        acct = acct[0:len(acct) - 1]
+        
+        node = config.readline()
+        node = node[0:len(node) - 1]
+
+        outlog = config.readline()
+        outlog = outlog[0:len(outlog) - 1]
+
+        winlog = config.readline()
+        winlog = winlog[0:len(winlog) - 1]
+
+        errlog = config.readline()
+        errlog = errlog[0:len(errlog) - 1]
+
+        line = config.readline()
+        keys = []
+
+        while line != "" and line != '\n':
+            
+            keys.append(line[0:len(line) - 1])
+
+            line = config.readline()
+
+#if the config file does not exist, make it and all other logs
+except FileNotFoundError:
+
+    #first, set our default (useless) values
+    acct = "None"
+    node = "wss://steemd.steemit.com"
+    outlog = os.path.join('data', 'out.log')
+    winlog = os.path.join('data', 'winners.log')
+    errlog = os.path.join('data', 'error.log')
+    keys = []
+
+    #next, make our config file
+    write_to_config()
+
+    #now, as an added precaution, make all of our log files
+    #we want this behavior for the first time the configurator is run
+    open(outlog, 'w').close()
+    open(winlog, 'w').close()
+    open(errlog, 'w').close()
+
+    #finally, also create the kill file
+    open(os.path.join('data', 'kill'), 'w').close()
+
+################################################################################
+################################################################################
 
 #prompt the user
 print("")
@@ -387,9 +431,9 @@ while True:
 
             acct = "None"
             node = "wss://steemd.steemit.com"
-            outlog = "data/out.log"
-            winlog = "data/winners.log"
-            errlog = "data/error.log"
+            outlog = os.path.join('data', 'out.log')
+            winlog = os.path.join('data', 'winners.log')
+            errlog = os.path.join('data', 'error.log')
             keys = []
 
             write_to_config()
