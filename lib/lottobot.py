@@ -36,7 +36,7 @@ class Lottobot(object):
         except Exception:
 
             print("Failed to find data files. Have you run the configurator?")
-            return 1
+            return None
 
         self.steem = piston.Steem(self.node_addr, keys = ckeys)
 
