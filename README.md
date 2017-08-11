@@ -17,8 +17,9 @@ Piston library and is licensed under the MIT (Expat) License.
 
 You will need Python (version 3.4.2 or later) and Piston (version 0.5.4 or later) to run Lottobot. You can
 download a copy of Python [here](https://www.python.org/). Piston is available in [a repository on GitHub](https://github.com/xeroc/piston-lib).
-However, the easiest way to install Piston is by using [pip](https://pypi.python.org/pypi/pip/). Run the command `pip3 install piston`
-to obtain a copy of the Piston library.
+However, the easiest way to install Piston is by using [pip](https://pypi.python.org/pypi/pip/). Run the command `pip3 install piston-lib`
+to obtain a copy of the Piston library. For more information about installing the Piston library, refer to the installation instructions located 
+[here](http://lib.piston.rocks/en/develop/installation.html).
 
 ## Usage
 
