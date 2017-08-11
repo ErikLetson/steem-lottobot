@@ -13,23 +13,30 @@ class Lottobot(object):
         self.config_path = os.path.join(directory, _CONFIGPATH)
         self.kill_path = os.path.join(directory, _KILLPATH)
 
-        with open(self.config_path, 'r') as cf:
+        try:
 
-            ckeys = [x for x in cf.readlines()]
+            with open(self.config_path, 'r') as cf:
 
-            #remove \n
-            for i in range(0, len(ckeys)):
+                ckeys = [x for x in cf.readlines()]
+
+                #remove \n
+                for i in range(0, len(ckeys)):
                 
-                if ckeys[i][len(ckeys[i]) - 1] == '\n':
+                    if ckeys[i][len(ckeys[i]) - 1] == '\n':
 
-                    ckeys[i] = ckeys[i][0:len(ckeys[i]) - 1]
+                        ckeys[i] = ckeys[i][0:len(ckeys[i]) - 1]
 
-            self.account_name = ckeys.pop(0)
-            self.node_addr = ckeys.pop(0)
+                self.account_name = ckeys.pop(0)
+                self.node_addr = ckeys.pop(0)
 
-            self.output_file = ckeys.pop(0)
-            self.winners_file = ckeys.pop(0)
-            self.error_file = ckeys.pop(0)
+                self.output_file = ckeys.pop(0)
+                self.winners_file = ckeys.pop(0)
+                self.error_file = ckeys.pop(0)
+
+        except Exception:
+
+            print("Failed to find data files. Have you run the configurator?")
+            return 1
 
         self.steem = piston.Steem(self.node_addr, keys = ckeys)
 
