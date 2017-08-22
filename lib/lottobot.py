@@ -172,7 +172,7 @@ class Lottobot(object):
 
                                     try:
 
-                                        body = "Congratulations! This post won a bonus resteem from @" + str(self.account_name) + "! Everytime a post is entered into @" + str(self.account_name) + "'s lottery, there is a chance for it to win a bonus resteem, in addition to the jackpot of a 100% upvote from @" + str(self.account_name) + ". Do you have a post you would like to nominate for the lottery? Just send 0.1 SBD or STEEM to @" + str(self.account_name) + " and place the url of the post you want to nominate in the memo. Good luck! WARNING: @" + str(self.account_name) + " is an instance of SteemLottoBot, which is still under development. Use at your own risk!"
+                                        body = "Congratulations! This post won a bonus resteem from @" + str(self.account_name) + "! Everytime a post is entered into @" + str(self.account_name) + "'s lottery, there is a chance for it to win a bonus resteem, in addition to the jackpot of a 100% upvote from @" + str(self.account_name) + ". Do you have a post you would like to nominate for the lottery? Just send 0.1 SBD or STEEM to @" + str(self.account_name) + " and place the url of the post you want to nominate in the memo. Good luck!"
                                         
                                         self.steem.reply(post_id, body, author = self.account_name)
 
@@ -276,7 +276,7 @@ class Lottobot(object):
                 #make a comment
                 try:
 
-                    body = "Congratulations! This post has been awarded a 100% upvote by @" + str(self.account_name) + "! This post was the winner of lottery #" + str(self.lotto) + ", which had a total of " + str(total_entries) + " entries. @" + str(self.account_name) + " always has a lottery going on! If you would like to nominate a post for the current lottery, just send 0.1 SBD or STEEM to @" + str(self.account_name) + ", and include the url of the post you would like to nominate as a memo. Good luck! WARNING: @" + str(self.account_name) + " is an instance of SteemLottoBot, which is still under development. Use at your own risk!"
+                    body = "Congratulations! This post has been awarded a 100% upvote by @" + str(self.account_name) + "! This post was the winner of lottery #" + str(self.lotto) + ", which had a total of " + str(total_entries) + " entries. @" + str(self.account_name) + " always has a lottery going on! If you would like to nominate a post for the current lottery, just send 0.1 SBD or STEEM to @" + str(self.account_name) + ", and include the url of the post you would like to nominate as a memo. Good luck!"
 
                     self.steem.reply(str(self.urls[index]), body, author = self.account_name)
 
