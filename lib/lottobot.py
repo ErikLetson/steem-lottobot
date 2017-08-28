@@ -89,7 +89,7 @@ class Lottobot(object):
 
                 outfile.write(str(time.ctime()) + "\n")
                 outfile.write("Begin pass #" + str(self.check_pass) + " of lottery #" + str(self.lotto) + "\n")
-                outfile.write("Remaining passes: " + str(900 - self.check_pass) + " (appx. end: " + time.strftime(time.localtime("%c", (900 - self.check_pass) + time.time())) + ")")#make 900 settable in config
+                outfile.write("Remaining passes: " + str(900 - self.check_pass) + " (appx. end: " + time.strftime(time.localtime("%h:%M:%S %p", time.localtime((900 - self.check_pass) + time.time()))) + ")")#make 900 settable in config
                 outfile.write("Current entrants: " + str(len(self.urls)))
 
             #Check the history of the account we are associated with
