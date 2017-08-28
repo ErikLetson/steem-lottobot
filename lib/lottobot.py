@@ -214,6 +214,32 @@ class Lottobot(object):
             
             self.check_pass += 1
 
+            if self.check_pass == 719:#last pass before 30-min carryover
+
+                with open(self.output_file, 'at') as outfile:
+
+                    outfile.write("Beginning 'clear' transfer...\n")
+
+                try:
+                    
+                    self.steem.transfer(self.account_name, 0.0001, "SBD")
+
+                except Exception:
+
+                    with open(self.output_file, 'at') as outfile:
+
+                        outfile.write("Failed to transfer 'clear' ammount to self.\n")
+                        outfile.write("Aborting...\n")
+                        outfile.write("Logging to error file...\n\n")
+
+                    #log it
+                    with open(self.error_file, 'at') as f:
+
+                        f.write(str(time.ctime()) + "\n")
+                        f.write("Failed to transfer to self.\n")
+                        f.write("----------\n")
+                        f.write("----------\n")
+
             if self.check_pass > 900:#appx 2.5 hrs
 
                 with open(self.output_file, 'at') as outfile:
