@@ -1,7 +1,7 @@
 import piston, os, time, random
 
 _CONFIGPATH = os.path.join('data', 'config')
-_KILLPATH = os.path.join('data', 'kill')
+_COMPATH = os.path.join('data', 'command')
 
 #make kill file if it does not exist
 #open(_KILLPATH, 'w').close()
@@ -11,7 +11,7 @@ class Lottobot(object):
     def __init__(self, directory):
 
         self.config_path = os.path.join(directory, _CONFIGPATH)
-        self.kill_path = os.path.join(directory, _KILLPATH)
+        self.command_path = os.path.join(directory, _KILLPATH)
 
         try:
 
@@ -48,6 +48,7 @@ class Lottobot(object):
             self.most_recent_index = item['index']
         
         self.on = True
+        self.run_next = True
 
         #data
         self.urls = []
@@ -60,20 +61,32 @@ class Lottobot(object):
         #run the bot
         self.run()
 
+    def check_run_commands(self):
+        """
+        Check the runcom file for runtime commands, then
+        execute them.
+        """
+
+        with open(self.command_path, 'r') as kf:
+
+            for line in kf.readlines():
+
+                if line[0:4] == 'KILL':
+
+                    self.on = False
+
+                elif line[0:4] == 'NEXT':
+
+                    self.
+        
     def run(self):
 
         while self.on:
 
             time.sleep(10)
 
-            #Check the kill file for an external kill command
-            with open(self.kill_path, 'r') as kf:
-
-                for line in kf.readlines():
-
-                    if line[0:4] == 'KILL':
-
-                        self.on = False
+            #Check the runcoms
+            self.check_run_commands()
 
             #if a kill command was detectected, end the loop
             if not self.on:
@@ -84,6 +97,12 @@ class Lottobot(object):
                     outfile.write('Successfully killed lottobot!\n')
 
                 break
+
+            #if the lottery is evenly divisible by 68, then a week has passed,
+            #so we choose a weekly winner
+            if self.check_pass % 68 == 0:
+
+                pass#TODO
 
             with open(self.output_file, 'at') as outfile:
 
@@ -253,18 +272,33 @@ class Lottobot(object):
 
                 self.choose_winner()
 
-                with open(self.output_file, 'at') as outfile:
+                if self.run_next:
 
-                    outfile.write("Reseting...\n")
+                    with open(self.output_file, 'at') as outfile:
 
-                self.check_pass = 0
-                self.lotto += 1
-                self.urls = self.next_urls
-                self.next_urls = []
+                        outfile.write("Reseting...\n")
 
-                with open(self.output_file, 'at') as outfile:
+                    self.check_pass = 0
+                    self.lotto += 1
+                    self.urls = self.next_urls
+                    self.next_urls = []
 
-                    outfile.write("Beginning lottery #" + str(self.lotto) + "\n\n")           
+                    #check for weekly contest entrants
+                    ####TODO
+
+                    #begin next lottery
+                    with open(self.output_file, 'at') as outfile:
+
+                        outfile.write("Beginning lottery #" + str(self.lotto) + "\n\n")
+
+                else:
+
+                    #open file for output writing
+                    with open(self.output_file, 'at') as outfile:
+
+                        outfile.write("Successfully killed lottobot following lotto #" + str(self.lotto) + "!\n")
+
+                    break
 
     def choose_winner(self):
 

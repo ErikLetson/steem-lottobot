@@ -144,6 +144,8 @@ while True:
         print("  r..........Reset configuration to default")
         print("  w..........Change path to winner log")
         print("")
+        print("To issue a command to the configurator, input a letter corresponding to a command above and press [ENTER].")
+        print("")
         print("The configurator is currently set to write to the configuration file located at " + conf_path)
         print("Assuming you didn't change it, this is the file that Lottobot will read its configuration data from.")
         print("You also can change Lottobot's configuration by directly editing the configuration file.")
