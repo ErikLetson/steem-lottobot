@@ -99,7 +99,7 @@ except FileNotFoundError:
     open(errlog, 'w').close()
 
     #finally, also create the kill file
-    open(os.path.join('data', 'kill'), 'w').close()
+    open(os.path.join('data', 'command'), 'w').close()
 
 ################################################################################
 ################################################################################
