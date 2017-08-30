@@ -30,9 +30,6 @@ def write_to_file(write_token):
     #delay for the take
     time.sleep(15)
 
-    #rewrite
-    open(killpath, 'w').close()
-
 ################################################################################
 ################################################################################
 
@@ -73,6 +70,34 @@ while True:
         print("To issue a command to the commander, input a letter corresponding to a command above and press [ENTER].")
         print("")
 
+    #kill lottobot at the end of the next lottery
+    elif cmd == 'c':
+
+        print("")
+        print("==Cancel Command==")
+        print("")
+        print("This will cancel a delayed action command.")
+
+        answer = input("Are you SURE you want to do this? (y/n) >>>")
+
+        if answer.lower() == 'y':
+
+            #prompt
+            print("")
+            print("Issueing command...")
+            print("Please wait appx. 15 seconds...")
+
+            write_to_config("TXEN")
+
+            print("")
+            print("Command issued!")
+            print("")
+
+        else:
+
+            print("OK, no command will be canceled.")
+            print("")
+
     #kill lottobot immediately
     elif cmd == 'k':
 
@@ -99,6 +124,86 @@ while True:
         else:
 
             print("OK, Lottobot will continue running.")
+            print("")
+
+    #kill lottobot at the end of the next lottery
+    elif cmd == 'n':
+
+        print("")
+        print("==Kill Lottobot (Next Lotto)==")
+        print("")
+        print("This will kill ALL running instances of Lottobot at the end of the current lottery.")
+
+        answer = input("Are you SURE you want to do this? (y/n) >>>")
+
+        if answer.lower() == 'y':
+
+            #prompt
+            print("")
+            print("Issueing command...")
+            print("Please wait appx. 15 seconds...")
+
+            write_to_config("NEXT")
+
+            print("")
+            print("Command issued!")
+            print("NOTE: This is a delayed command. You can cancel it by entering 'c' here in the commander.")
+            print("")
+
+        else:
+
+            print("OK, no command will be issued.")
+            print("")
+
+    #Trim (empty) log files
+    ##NOTE: Trimming will be improved to be more delicate (and have more modes)
+    ## in a future version.
+    elif cmd == 't':
+
+        print("")
+        print("==Trim Logs==")
+        print("")
+        print("This will empty the log files that Lottobot writes to.")
+
+        answer = input("Are you SURE you want to do this? (y/n) >>>")
+
+        if answer.lower() == 'y':
+
+            #prompt
+            print("")
+            print("Emptying...")
+            print("Please wait appx. 15 seconds...")
+
+            write_to_config("TRIM")
+
+            print("")
+            print("Emptying complete!")
+            print("")
+
+        else:
+
+            print("OK, no changes will be made.")
+            print("")
+
+    #quit the commander
+    elif cmd == 'q':
+
+        print("")
+        print("==Quit==")
+        print("")
+
+        q = input("Are you sure you want to quit the commander? (y/n) >>>")
+
+        if q.lower() == 'y':
+            
+            print("")
+            print("Exiting the commander...")
+            print("")
+            
+            break
+
+        else:
+
             print("")
 
     #if the command is illegal

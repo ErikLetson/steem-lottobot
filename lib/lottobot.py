@@ -67,17 +67,46 @@ class Lottobot(object):
         execute them.
         """
 
-        with open(self.command_path, 'r') as kf:
+        rewrite = False
 
-            for line in kf.readlines():
+        with open(self.command_path, 'r') as rf:
+
+            for line in rf.readlines():
 
                 if line[0:4] == 'KILL':
 
                     self.on = False
 
+                    rewrite = True
+
                 elif line[0:4] == 'NEXT':
 
-                    self.
+                    self.run_next = False
+
+                    rewrite = True
+
+                elif line[0:4] == 'TXEN':
+
+                    self.run_next = True
+
+                    rewrite = True
+
+                elif line[0:4] == 'TRIM':
+
+                    self.trim_logs()
+
+                    rewrite = True
+
+        if rewrite:
+
+            #rewrite
+            open(self.command_path, 'w').close()
+
+    def trim_logs(self):
+
+        open(self.output_file, 'w').close()
+        open(self.winners_file, 'w').close()
+        open(self.error_file, 'w').close()
         
     def run(self):
 
