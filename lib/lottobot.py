@@ -2,6 +2,7 @@ import piston, os, time, random
 
 _CONFIGPATH = os.path.join('data', 'config')
 _COMPATH = os.path.join('data', 'command')
+_SETUPPATH = os.path.join('data', 'setup')
 
 #make kill file if it does not exist
 #open(_KILLPATH, 'w').close()
@@ -12,6 +13,7 @@ class Lottobot(object):
 
         self.config_path = os.path.join(directory, _CONFIGPATH)
         self.command_path = os.path.join(directory, _KILLPATH)
+        self.setup_path = os.path.join(directory, _SETUPPATH)
 
         try:
 
@@ -129,8 +131,37 @@ class Lottobot(object):
             if sbd > 0.001:
 
                 self.steem.transfer(self.associated_account, sbd - 0.001, 'SBD', memo = 'Automatic transfer')
-            
+
+    def setup_run(self):
+
+        with open(self.setup_path, 'r') as sf:
+
+            defaults = [x for x in sf.readlines()]
+
+            if len(defaults) > 0:
+
+                #remove \n, change type
+                for i in range(0, len(defaults)):
+                
+                    if defaults[i][len(defaults[i]) - 1] == '\n':
+
+                        defaults[i] = defaults[i][0:len(defaults[i]) - 1]
+
+                    defaults[i] = int(defaults[i])
+
+                self.lotto = defaults.pop(0)
+                self.check_pass = defaults.pop(0)
+
+    def remember_setup(self):
+
+        with open(self.setup_path, 'w') as sf:
+
+            sf.write(str(self.lotto) + '\n')
+            sf.write(str(self.check_pass))
+        
     def run(self):
+
+        self.setup_run()
 
         while self.on:
 
@@ -141,6 +172,8 @@ class Lottobot(object):
 
             #if a kill command was detectected, end the loop
             if not self.on:
+
+                self.remember_setup()
 
                 #open file for output writing
                 with open(self.output_file, 'at') as outfile:
@@ -232,6 +265,11 @@ class Lottobot(object):
                             #resteem bonus chance
                             rs_chance = random.randint(0, 20)
 
+                            with open(self.output_file, 'at') as outfile:
+                                        
+                                outfile.write("Roll for bonus resteem!\n")
+                                outfile.write("Rolled a " + str(rs_chance))
+
                             if rs_chance == random.randint(0, 20):
 
                                 try:
@@ -294,7 +332,7 @@ class Lottobot(object):
 
                 try:
                     
-                    self.steem.transfer(self.account_name, 0.0001, "SBD")
+                    self.steem.transfer(self.account_name, 0.001, "SBD")
                     outfile.write("Lotto entrants cleared.\n")
                     outfile.write("Entrants will now be added to upcoming lottery.\n")
                     outfile.write("\n")
