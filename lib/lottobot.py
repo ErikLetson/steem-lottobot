@@ -57,6 +57,8 @@ class Lottobot(object):
         #stats
         self.lotto = 0#current lottery (iterates after a winner)
         self.check_pass = 0#iterated each time we check for transfers (resets after a winner)
+        self.lotto_length = 900#total # of passes
+        self.holdover_threshold = 720#pass to carry over further entrants to next lotto
 
         #run the bot
         self.run()
@@ -191,7 +193,7 @@ class Lottobot(object):
                                 outfile.write(str(post_id) + " is valid!\n")
                                 outfile.write("Cash recieved: " + str(item['amount']) + "\n")
 
-                            if self.check_pass > 720:
+                            if self.check_pass >= self.holdover_threshold:
 
                                 self.next_urls.append(post_id)
 
@@ -264,7 +266,7 @@ class Lottobot(object):
             
             self.check_pass += 1
 
-            if self.check_pass == 719:#last pass before 30-min carryover
+            if self.check_pass == self.holdover_threshold - 1:#last pass before carryover
 
                 with open(self.output_file, 'at') as outfile:
 
@@ -293,7 +295,7 @@ class Lottobot(object):
                         f.write("----------\n")
                         f.write("----------\n")
 
-            if self.check_pass > 900:#appx 2.5 hrs
+            if self.check_pass > self.lotto_length:#appx 2.5 hrs (default)
 
                 with open(self.output_file, 'at') as outfile:
 
