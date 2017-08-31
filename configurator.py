@@ -22,6 +22,7 @@ node = "wss://steemd.steemit.com"
 outlog = os.path.join('data', 'out.log')
 winlog = os.path.join('data', 'winners.log')
 errlog = os.path.join('data', 'error.log')
+assac = "None"
 keys = []
 
 ################################################################################
@@ -39,6 +40,7 @@ def write_to_config():
         f.write(str(outlog) + '\n')
         f.write(str(winlog) + '\n')
         f.write(str(errlog) + '\n')
+        f.write(str(assac) + '\n')
 
         for k in keys:
 
@@ -69,6 +71,9 @@ try:
         errlog = config.readline()
         errlog = errlog[0:len(errlog) - 1]
 
+        assac = config.readline()
+        assac = assac[0:len(assac) - 1]
+
         line = config.readline()
         keys = []
 
@@ -87,6 +92,7 @@ except FileNotFoundError:
     outlog = os.path.join('data', 'out.log')
     winlog = os.path.join('data', 'winners.log')
     errlog = os.path.join('data', 'error.log')
+    assac = "None"
     keys = []
 
     #next, make our config file
@@ -142,6 +148,7 @@ while True:
         print("  n..........Change the default Steem node")
         print("  q..........Quit the configurator")
         print("  r..........Reset configuration to default")
+        print("  s..........Add an associated account to make automatic transfers to")
         print("  w..........Change path to winner log")
         print("")
         print("To issue a command to the configurator, input a letter corresponding to a command above and press [ENTER].")
@@ -157,7 +164,9 @@ while True:
         print("")
         print("==Change Account Name==")
         print("")
-
+        print("This will change the name of the account that Lottobot uses (currently: " + acct + ")")
+        print("")
+        
         confirm = ""
         
         while confirm.lower() != 'y':
@@ -188,6 +197,7 @@ while True:
         print("==Delete WIF Keys==")
         print("")
         print("This will delete *ALL* of the WIF keys currently stored in the configuration file at " + conf_path)
+        print("")
 
         answer = input("Are you SURE? (y/n) >>>")
 
@@ -421,6 +431,7 @@ while True:
         print("  output log path......data/out.log")
         print("  winners log path.....data/winners.log")
         print("  error log path.......data/error.log")
+        print("  associated account...None")
         print("  keys.................None")
         print("")
 
@@ -436,6 +447,7 @@ while True:
             outlog = os.path.join('data', 'out.log')
             winlog = os.path.join('data', 'winners.log')
             errlog = os.path.join('data', 'error.log')
+            assac = "None"
             keys = []
 
             write_to_config()
@@ -448,6 +460,39 @@ while True:
             print("")
             print("OK, no changes will be made.")
             print("")
+
+    #add an associated account
+    elif cmd == 's':
+
+        print("")
+        print("==Add Associated Account==")
+        print("")
+        print("This will change the name of the account that Lottobot will make automatic transfers to (default: None, currently: " + assac + ")")
+        print("Note that this value is optional. To set the name of the account that Lottobot will use to perform its normal functions, enter option 'a' into the configurator.")
+        print("")
+        
+        confirm = ""
+        
+        while confirm.lower() != 'y':
+
+            new_name = input("Please enter a Steem account name >>>")
+
+            print("")
+
+            confirm = input("You entered " + str(new_name) + ". Is this name correct? (y/n) >>>")
+
+            print("")
+
+        print("Writing associated account name " + str(new_name) + " to file...")
+
+        assac = new_name
+
+        write_to_config()
+
+        print("")
+        print("Write complete")
+        print("Associated account name is set to " + str(new_name) + ".")
+        print("")
 
     #change winner log path
     elif cmd == 'w':

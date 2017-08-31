@@ -33,6 +33,8 @@ class Lottobot(object):
                 self.winners_file = ckeys.pop(0)
                 self.error_file = ckeys.pop(0)
 
+                self.associated_account = ckeys.pop(0)
+
         except Exception:
 
             print("Failed to find data files. Have you run the configurator?")
@@ -109,7 +111,25 @@ class Lottobot(object):
         open(self.output_file, 'w').close()
         open(self.winners_file, 'w').close()
         open(self.error_file, 'w').close()
-        
+
+    def reward(self):
+
+        self.steem.claim_reward_balance()
+
+        if self.associated_account != 'None':
+
+            balances = s.get_balances()
+            stm = float(balances['balance'])
+            sbd = float(balances['sbd_balance'])
+
+            if stm > 0:
+
+                self.steem.transfer(self.associated_account, stm, 'STEEM', memo = 'Automatic transfer')
+
+            if sbd > 0.001:
+
+                self.steem.transfer(self.associated_account, sbd - 0.001, 'SBD', memo = 'Automatic transfer')
+            
     def run(self):
 
         while self.on:
@@ -302,6 +322,10 @@ class Lottobot(object):
                     outfile.write("Choosing winner...\n")
 
                 self.choose_winner()
+
+                #Withdraw any extant account rewards, then transfer a certain
+                #amount to the 'associated' account
+                self.reward()
 
                 if self.run_next:
 
