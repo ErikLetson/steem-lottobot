@@ -61,7 +61,7 @@ class Lottobot(object):
         #stats
         self.lotto = 0#current lottery (iterates after a winner)
         self.check_pass = 0#iterated each time we check for transfers (resets after a winner)
-        self.lotto_length = 9#total # of passes
+        self.lotto_length = 900#total # of passes
         self.holdover_threshold = 720#pass to carry over further entrants to next lotto
 
         #run the bot
@@ -198,7 +198,7 @@ class Lottobot(object):
 
                 outfile.write(str(time.ctime()) + "\n")
                 outfile.write("Begin pass #" + str(self.check_pass) + " of lottery #" + str(self.lotto) + "\n\n")
-                outfile.write("Remaining passes: " + str(900 - self.check_pass) + " (appx. end: " + time.strftime("%H:%M %p", time.localtime((9000 - (10 * self.check_pass)) + time.time())) + ")\n")#make 900 settable in config
+                outfile.write("Remaining passes: " + str(900 - self.check_pass) + " (appx. end: " + time.strftime("%H:%M %p", time.localtime(((10 * self.lotto_length)- (10 * self.check_pass)) + time.time())) + ")\n")#make 900 settable in config
                 outfile.write("Current entrants: " + str(len(self.urls)) + "\n\n")
 
             #Check the history of the account we are associated with
