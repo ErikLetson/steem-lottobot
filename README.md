@@ -27,8 +27,9 @@ Before starting Lottobot, you should run the included file `configurator.py` and
 configurator has several options (to see a complete list of options, as well as some more general help, enter 
 option `h`). First, you will want to give Lottobot an account to associate with, so enter option `a` into the 
 configurator. Next, you will want to give Lottobot access to the private WIF keys associated with that account 
-so that it can operate it. The only keys that Lottobot needs access to are the posting key and the memo key. 
-Enter option `k` to pass keys to Lottobot.
+so that it can operate it. The only keys that Lottobot *needs* access to are the posting key and the memo key. If
+you want to use the "associated account" feature to make automatic transfers to another account, Lottobot will
+also need your active key. Enter option `k` to pass keys to Lottobot.
 
 NOTE: Keys that you pass to Lottobot are stored in plain text (in the file `data/config`) so that Lottobot can
 act without having to ask for your credentials. THIS CAN BE A SECURITY RISK!
@@ -36,8 +37,9 @@ act without having to ask for your credentials. THIS CAN BE A SECURITY RISK!
 After configuring Lottobot, simply run the file `start.py` to begin. Lottobot will output messages to a series
 of log files located in the `data` directory.
 
-If you would like to stop a running instance of Lottobot, the recommended method is to run the file `killit.py`.
-This will kill ALL running instances of Lottobot.
+Lottobot can accept some commands while running. These commands are passed to Lottobot using the `runcom.py` file.
+Using this file is the recommended way to stop a running instance of Lottobot. To stop (kill) Lottobot immediately,
+enter `k` into the runtime commander (`runcom.py`), or to kill it at the end of the current lottery, enter `n`.
 
 To enter a post in Lottobot's lottery, simply send a transfer of at least 0.1 SBD or STEEM to the account that
 you associated Lottobot with, and include the url of the post in the memo of the transfer. Lottobot will then

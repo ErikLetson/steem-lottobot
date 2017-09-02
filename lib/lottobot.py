@@ -12,7 +12,7 @@ class Lottobot(object):
     def __init__(self, directory):
 
         self.config_path = os.path.join(directory, _CONFIGPATH)
-        self.command_path = os.path.join(directory, _KILLPATH)
+        self.command_path = os.path.join(directory, _COMPATH)
         self.setup_path = os.path.join(directory, _SETUPPATH)
 
         try:
@@ -61,7 +61,7 @@ class Lottobot(object):
         #stats
         self.lotto = 0#current lottery (iterates after a winner)
         self.check_pass = 0#iterated each time we check for transfers (resets after a winner)
-        self.lotto_length = 900#total # of passes
+        self.lotto_length = 9#total # of passes
         self.holdover_threshold = 720#pass to carry over further entrants to next lotto
 
         #run the bot
@@ -116,21 +116,27 @@ class Lottobot(object):
 
     def reward(self):
 
-        self.steem.claim_reward_balance()
+        try:
+
+            self.steem.claim_reward_balance(account = self.account_name)
+
+        except Exception:
+
+            pass#alert somehow here
 
         if self.associated_account != 'None':
 
-            balances = s.get_balances()
+            balances = self.steem.get_balances(account = self.account_name)
             stm = float(balances['balance'])
             sbd = float(balances['sbd_balance'])
 
             if stm > 0:
 
-                self.steem.transfer(self.associated_account, stm, 'STEEM', memo = 'Automatic transfer')
+                self.steem.transfer(self.associated_account, stm, 'STEEM', memo = 'Automatic transfer', account = self.account_name)
 
             if sbd > 0.001:
 
-                self.steem.transfer(self.associated_account, sbd - 0.001, 'SBD', memo = 'Automatic transfer')
+                self.steem.transfer(self.associated_account, sbd - 0.001, 'SBD', memo = 'Automatic transfer', account = self.account_name)
 
     def setup_run(self):
 
@@ -191,9 +197,9 @@ class Lottobot(object):
             with open(self.output_file, 'at') as outfile:
 
                 outfile.write(str(time.ctime()) + "\n")
-                outfile.write("Begin pass #" + str(self.check_pass) + " of lottery #" + str(self.lotto) + "\n")
-                outfile.write("Remaining passes: " + str(900 - self.check_pass) + " (appx. end: " + time.strftime(time.localtime("%h:%M:%S %p", time.localtime((900 - self.check_pass) + time.time()))) + ")")#make 900 settable in config
-                outfile.write("Current entrants: " + str(len(self.urls)))
+                outfile.write("Begin pass #" + str(self.check_pass) + " of lottery #" + str(self.lotto) + "\n\n")
+                outfile.write("Remaining passes: " + str(900 - self.check_pass) + " (appx. end: " + time.strftime("%H:%M %p", time.localtime((9000 - (10 * self.check_pass)) + time.time())) + ")\n")#make 900 settable in config
+                outfile.write("Current entrants: " + str(len(self.urls)) + "\n\n")
 
             #Check the history of the account we are associated with
             for item in self.account.history():
@@ -268,7 +274,7 @@ class Lottobot(object):
                             with open(self.output_file, 'at') as outfile:
                                         
                                 outfile.write("Roll for bonus resteem!\n")
-                                outfile.write("Rolled a " + str(rs_chance))
+                                outfile.write("Rolled a " + str(rs_chance) + "\n")
 
                             if rs_chance == random.randint(0, 20):
 
@@ -332,7 +338,7 @@ class Lottobot(object):
 
                 try:
                     
-                    self.steem.transfer(self.account_name, 0.001, "SBD")
+                    self.steem.transfer(self.account_name, 0.001, "SBD", account = self.account_name)
                     outfile.write("Lotto entrants cleared.\n")
                     outfile.write("Entrants will now be added to upcoming lottery.\n")
                     outfile.write("\n")

@@ -87,7 +87,7 @@ while True:
             print("Issueing command...")
             print("Please wait appx. 15 seconds...")
 
-            write_to_config("TXEN")
+            write_to_file("TXEN")
 
             print("")
             print("Command issued!")
@@ -115,7 +115,7 @@ while True:
             print("Killing lottobot...")
             print("Please wait appx. 15 seconds...")
 
-            write_to_config("KILL")
+            write_to_file("KILL")
 
             print("")
             print("Killing complete!")
@@ -140,10 +140,10 @@ while True:
 
             #prompt
             print("")
-            print("Issueing command...")
+            print("Issuing command...")
             print("Please wait appx. 15 seconds...")
 
-            write_to_config("NEXT")
+            write_to_file("NEXT")
 
             print("")
             print("Command issued!")
@@ -174,7 +174,7 @@ while True:
             print("Emptying...")
             print("Please wait appx. 15 seconds...")
 
-            write_to_config("TRIM")
+            write_to_file("TRIM")
 
             print("")
             print("Emptying complete!")

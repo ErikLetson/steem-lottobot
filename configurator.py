@@ -324,6 +324,7 @@ while True:
         print("")
         print("  Current account name..........." + str(acct))
         print("")
+        print("  Current associated  account...." + str(assac))
         print("  Current Steem node............." + str(node))
         print("")
         print("  Output log location............" + str(outlog))
