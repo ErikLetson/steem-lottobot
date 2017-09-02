@@ -339,9 +339,12 @@ class Lottobot(object):
                 try:
                     
                     self.steem.transfer(self.account_name, 0.001, "SBD", account = self.account_name)
-                    outfile.write("Lotto entrants cleared.\n")
-                    outfile.write("Entrants will now be added to upcoming lottery.\n")
-                    outfile.write("\n")
+
+                    with open(self.output_file, 'at') as outfile:
+                        
+                        outfile.write("Lotto entrants cleared.\n")
+                        outfile.write("Entrants will now be added to upcoming lottery.\n")
+                        outfile.write("\n")
 
                 except Exception:
 
