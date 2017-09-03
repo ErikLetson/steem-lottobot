@@ -1,7 +1,7 @@
 # Steem Lottobot
 
 Lottobot is a simple command line automated program that will run a lottery on the Steem network. Lottobot can
-recieve urls (in the form of memos attached to Steem or SBD transfers made to an associated account) and add
+recieve urls (in the form of memos attached to Steem or SBD transfers made to an account it uses) and add
 them to a pool of potential lottery winners. When the lottery is over, Lottobot will pick a random winner to
 give a 100% upvote to, then begin a new lottery automatically. Lottobot is implemented in Python 3.x with the
 Piston library and is licensed under the MIT (Expat) License.
@@ -25,8 +25,8 @@ to obtain a copy of the Piston library. For more information about installing th
 
 Before starting Lottobot, you should run the included file `configurator.py` and set up your configuration. The
 configurator has several options (to see a complete list of options, as well as some more general help, enter 
-option `h`). First, you will want to give Lottobot an account to associate with, so enter option `a` into the 
-configurator. Next, you will want to give Lottobot access to the private WIF keys associated with that account 
+option `h`). First, you will want to give Lottobot an account to hold its lottery with, so enter option `a` into the 
+configurator. Next, you will want to give Lottobot access to the private WIF keys from that account 
 so that it can operate it. The only keys that Lottobot *needs* access to are the posting key and the memo key. If
 you want to use the "associated account" feature to make automatic transfers to another account, Lottobot will
 also need your active key. Enter option `k` to pass keys to Lottobot.
