@@ -37,12 +37,13 @@ act without having to ask for your credentials. THIS CAN BE A SECURITY RISK!
 After configuring Lottobot, simply run the file `start.py` to begin. Lottobot will output messages to a series
 of log files located in the `data` directory.
 
-Lottobot can accept some commands while running. These commands are passed to Lottobot using the `runcom.py` file.
-Using this file is the recommended way to stop a running instance of Lottobot. To stop (kill) Lottobot immediately,
-enter `k` into the runtime commander (`runcom.py`), or to kill it at the end of the current lottery, enter `n`.
+Lottobot can accept some commands while running. These commands are passed to Lottobot using the `runcom.py` file,
+which is also called the runtime commander. Using the runtime commander is the recommended way to stop a running 
+instance of Lottobot. To stop (kill) Lottobot immediately, enter `k` into the runtime commander, or to kill it at
+the end of the current lottery, enter `n`.
 
 To enter a post in Lottobot's lottery, simply send a transfer of at least 0.1 SBD or STEEM to the account that
-you associated Lottobot with, and include the url of the post in the memo of the transfer. Lottobot will then
+Lottobot is set to use, and include the URL of the post in the memo of the transfer. Lottobot will then
 automatically enter the post in the lottery! If there is a problem with the transfer, Lottobot will output an
 error message to `error.log` and continue with the lottery.
 
@@ -53,6 +54,9 @@ and ensure that you enter all information correctly!
 ## Contributions
 
 Contributions are always welcome! Be sure you read [the license](LICENSE.txt) and that you sign [the signoff](SIGNOFF.txt) file.
+
+Also, if you use Lottobot or a modified version of it to run a lottery yourself, I would love to hear from you! You can email me at
+hmagellan (at) tutamail (dot) com.
 
 ## License
 
