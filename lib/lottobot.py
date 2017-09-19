@@ -1,4 +1,5 @@
 import piston, os, time, random
+from piston.blog import Blog
 
 _CONFIGPATH = os.path.join('data', 'config')
 _COMPATH = os.path.join('data', 'command')
@@ -46,6 +47,8 @@ class Lottobot(object):
 
         self.account = piston.account.Account(self.account_name, steem_instance = self.steem)
 
+        self.blockchain = piston.blockchain.Blockchain(self.steem)
+        
         #get the last index. history tracking will start from there
         for item in self.account.history():
             
@@ -57,12 +60,27 @@ class Lottobot(object):
         #data
         self.urls = []
         self.next_urls = []#after we hit the 2hr mark, store urls for next lotto
+        self.longlotto_entrants = []#usernames who are eligible for the longlotto
+        self.longlotto_resteemers = []#those who resteemed the longlotto post
 
         #stats
         self.lotto = 0#current lottery (iterates after a winner)
         self.check_pass = 0#iterated each time we check for transfers (resets after a winner)
         self.lotto_length = 900#total # of passes
         self.holdover_threshold = 720#pass to carry over further entrants to next lotto
+        self.sleep_time = 10#rough number of seconds to delay between passes
+
+        self.longlotto_number = 0#current longlotto (iterated every week at default)
+        #self.longlotto_dividend = 68#the number that the check pass is divided by to see if it is time to decide the longlotto
+        self.longlotto_prize = 25#in SBD
+        self.longlotto_ongoing = False
+        self.current_longlotto_post_id = None
+
+        self.total_earnings_steem = 0
+        self.total_earnings_sbd = 0
+
+        self.steem_minimum = 0
+        self.sbd_minimum = 0.001#cannot be 0
 
         #run the bot
         self.run()
@@ -130,13 +148,13 @@ class Lottobot(object):
             stm = float(balances['balance'])
             sbd = float(balances['sbd_balance'])
 
-            if stm > 0:
+            if stm > self.steem_minimum:
 
-                self.steem.transfer(self.associated_account, stm, 'STEEM', memo = 'Automatic transfer', account = self.account_name)
+                self.steem.transfer(self.associated_account, stm - self.steem_minimum, 'STEEM', memo = 'Automatic transfer', account = self.account_name)
 
-            if sbd > 0.001:
+            if sbd > (self.sbd_minimum + self.longlotto_prize):
 
-                self.steem.transfer(self.associated_account, sbd - 0.001, 'SBD', memo = 'Automatic transfer', account = self.account_name)
+                self.steem.transfer(self.associated_account, sbd - (self.sbd_minimum + self.longlotto_prize), 'SBD', memo = 'Automatic transfer', account = self.account_name)
 
     def setup_run(self):
 
@@ -164,6 +182,30 @@ class Lottobot(object):
 
             sf.write(str(self.lotto) + '\n')
             sf.write(str(self.check_pass))
+
+    def post_longlotto(self):
+
+        ptitle = "Weekly @" + str(self.account_name) + " Special Lottery #" + str(self.longlotto_number) + "! (GRAND PRIZE OF " + str(self.longlotto_prize) + " SBD!)"
+        pbody = ""
+        pauthor = self.account_name
+        ptags = ["contest", "steemit", "steem", "lottobot", "money"]
+        
+        self.steem.post(ptitle, pbody, author = pauthor, tags = ptags)
+
+        #clear history
+        self.steem.transfer(self.account_name, self.sbd_minimum, "SBD", account = self.account_name)
+
+        ##Get the post id of this post
+        b = Blog(self.account_name, self.steem)
+        self.current_longlotto_post_id = "https://steemit.com/" + str(ptags[0]) + "/" + str(b[0])
+
+    def check_longlotto_entries(self):
+
+        pass
+
+    def end_longlotto(self):
+
+        pass
         
     def run(self):
 
@@ -171,7 +213,7 @@ class Lottobot(object):
 
         while self.on:
 
-            time.sleep(10)
+            time.sleep(self.sleep_time)
 
             #Check the runcoms
             self.check_run_commands()
@@ -188,11 +230,30 @@ class Lottobot(object):
 
                 break
 
-            #if the lottery is evenly divisible by 68, then a week has passed,
+            #if the lottery is evenly divisible by the dividend, then a week has passed,
             #so we choose a weekly winner
-            if self.check_pass % 68 == 0:
+            #if self.lotto % self.longlotto_dividend == 0 and self.check_pass == 0:
 
-                pass#TODO
+            #check the time. If it is Saturday at 3:00PM, start the longlotto
+            tm = time.gmtime()#hour is index 3, weekday is index 5
+            
+            if tm[6] == 5 and tm[3] == 15 and not self.longlotto_ongoing:
+
+                self.longlotto_ongoing = True
+            
+                self.post_longlotto()
+
+            #check if the longlotto is over
+            elif tm[6] == 5 and tm[3] == 12 and self.longlotto_ongoing:
+
+                self.longlotto_ongoing = False
+
+                self.end_longlotto()
+
+            #check for longlotto entrants
+            if self.longlotto_ongoing:
+
+                self.check_longlotto_entries()
 
             with open(self.output_file, 'at') as outfile:
 
@@ -338,7 +399,7 @@ class Lottobot(object):
 
                 try:
                     
-                    self.steem.transfer(self.account_name, 0.001, "SBD", account = self.account_name)
+                    self.steem.transfer(self.account_name, self.sbd_minimum, "SBD", account = self.account_name)
 
                     with open(self.output_file, 'at') as outfile:
                         
