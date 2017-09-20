@@ -1,4 +1,4 @@
-import piston, os, time, random
+import piston, os, time, random, ast
 from piston.blog import Blog
 
 _CONFIGPATH = os.path.join('data', 'config')
@@ -62,7 +62,8 @@ class Lottobot(object):
         self.next_urls = []#after we hit the 2hr mark, store urls for next lotto
         self.longlotto_entrants = []#usernames who are eligible for the longlotto
         self.longlotto_resteemers = []#those who resteemed the longlotto post
-
+        self.longlotto_upvoters = []#those who upvote the longlotto post
+        
         #stats
         self.lotto = 0#current lottery (iterates after a winner)
         self.check_pass = 0#iterated each time we check for transfers (resets after a winner)
@@ -75,6 +76,9 @@ class Lottobot(object):
         self.longlotto_prize = 25#in SBD
         self.longlotto_ongoing = False
         self.current_longlotto_post_id = None
+
+        self.start_block = -1
+        self.end_block = -1
 
         self.total_earnings_steem = 0
         self.total_earnings_sbd = 0
@@ -185,6 +189,10 @@ class Lottobot(object):
 
     def post_longlotto(self):
 
+        #TODO:
+        # Define the contents of the title, body, author, and tags in the
+        # configurator.
+
         ptitle = "Weekly @" + str(self.account_name) + " Special Lottery #" + str(self.longlotto_number) + "! (GRAND PRIZE OF " + str(self.longlotto_prize) + " SBD!)"
         pbody = ""
         pauthor = self.account_name
@@ -192,16 +200,69 @@ class Lottobot(object):
         
         self.steem.post(ptitle, pbody, author = pauthor, tags = ptags)
 
-        #clear history
+        #clear history (piston shortcoming)
         self.steem.transfer(self.account_name, self.sbd_minimum, "SBD", account = self.account_name)
 
         ##Get the post id of this post
         b = Blog(self.account_name, self.steem)
-        self.current_longlotto_post_id = "https://steemit.com/" + str(ptags[0]) + "/" + str(b[0])
+        self.current_longlotto_post_id = str(b[0].identifier)
 
+        self.start_block = self.blockchain.get_current_block_num()
+        
     def check_longlotto_entries(self):
 
-        pass
+        self.end_block = self.blockchain.get_current_block_num()
+
+        followers = self.account.get_followers()
+
+        #check thru the blockchain for resteemers & upvoters
+        if self.start_block >= 0:
+
+            for b in self.blockchain.blocks(start = self.start_block, stop = self.end_block):
+
+                #here, b is an entire block
+                #first, get the transactions on block b
+                transactions = b['transactions']
+
+                #next, get the operations of each transaction on block b
+                for tran in transactions:
+
+                    ops = tran['operations']
+
+                    #now, see if this is a custom json operation, and, if
+                    #it is, see if it is also a 'reblog'. If so, check the
+                    #post id to see if it is our post
+                    if ops[0][0] == 'custom_json' and ops[0][1]['json'][2:8] == 'reblog':
+
+                        #convert the ops[0][1]['json'] string to a list
+                        jsn = ast.literal_eval(ops[0][1]['json'])
+
+                        #if the author is our account and the post is our
+                        #longlotto post, add to the resteemers list
+                        idtf = "@" + str(jsn[1]['author']) + "/" + str(jsn[1][permlink])
+
+                        if idtf = self.current_longlotto_post_id:
+
+                            self.longlotto_resteemers.append(jsn[1]['account'])
+
+                    #if not, check if it was an upvote on our post
+                    elif ops[0][0] == 'vote' and ops[0][1]['weight'] > 0 and '@' + self.account_name + "/" + ops[0][1]['permlink'] == self.current_longlotto_post_id:
+
+                        self.longlotto_upvoters.append(ops[0][1]['voter'])
+
+        #with our lists of resteemers & upvoters updated, check against follower
+        #list for entrants
+        for f in followers:
+
+            if f in self.longlotto_resteemers and f in self.longlotto_upvoters:
+
+                self.longlotto_entrants.append(f)
+
+                self.longlotto_resteemers.remove(f)
+                self.longlotto_upvoters.remove(f)
+
+        #update info for next pass
+        self.start_block = self.end_block + 1
 
     def end_longlotto(self):
 
