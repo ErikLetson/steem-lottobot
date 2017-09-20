@@ -266,7 +266,28 @@ class Lottobot(object):
 
     def end_longlotto(self):
 
-        pass
+        #choose a random winner from among the entrants list
+        total_entries = len(self.longlotto_entrants)
+
+        self.longlotto_entrants.shuffle()
+
+        index = random.randint(0, total_entries - 1)
+
+        #send the prize money to the winner
+
+        #TODO: Add a mechanism to check that we have the needed prize
+        # money
+        self.steem.transfer(self.longlotto_entrants[index], self.longlotto_prize, "SBD", account = self.account_name)
+
+        #TODO: Record winner, add log output thru entire process
+
+        #Reset the values of the lottery
+        self.longlotto_entrants = []#usernames who are eligible for the longlotto
+        self.longlotto_resteemers = []#those who resteemed the longlotto post
+        self.longlotto_upvoters = []
+
+        self.start_block = -1
+        self.end_block = -1
         
     def run(self):
 
