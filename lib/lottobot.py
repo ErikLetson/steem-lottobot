@@ -144,7 +144,16 @@ class Lottobot(object):
 
         except Exception:
 
-            pass#alert somehow here
+            with open(self.output_file, 'at') as outfile:
+                
+                outfile.write("Failed to withdraw reward balance. \n")
+                outfile.write("Writing to error log...\n")
+
+            with open(self.error_file, 'at') as f:
+                
+                f.write(str(time.ctime()) + ": \n")
+                f.write("Failed to claim reward balance. Perhaps there is none available?\n")
+                f.write("----------------------------\n")
 
         if self.associated_account != 'None':
 
@@ -197,10 +206,40 @@ class Lottobot(object):
         pbody = ""
         pauthor = self.account_name
         ptags = ["contest", "steemit", "steem", "lottobot", "money"]
+
+        #try to make the post
+        try:
+
+            with open(self.output_file, 'at') as outfile:
+                
+                outfile.write("Making longlotto post for longlotto #" + str(self.longlotto_number) + "\n")
         
-        self.steem.post(ptitle, pbody, author = pauthor, tags = ptags)
+            self.steem.post(ptitle, pbody, author = pauthor, tags = ptags)
+
+        except Exception:
+
+            with open(self.output_file, 'at') as outfile:
+                
+                outfile.write("WARNING! Failed to make longlotto post!\n")
+                outfile.write("Dumping to error log...\n\n")
+
+            with open(self.error_file, 'at') as f:
+                
+                f.write(str(time.ctime()) + ": \n")
+                f.write("Failed to make longlotto post!\n\n")
+                f.write(" Title was..... " + str(ptitle) + "\n")
+                f.write(" Tags were..... " + str(ptags) + "\n\n")
+                f.write("BODY: \n")
+                f.write(str(pbody) + "\n\n")
+                f.write("THE LONGLOTTO WILL NOT BE ABLE TO FUNCTION WITHOUT THIS POST!\n")
+                f.write("FIX IMMEDIATELY!!\n")
+                f.write("------------------\n")
 
         #clear history (piston shortcoming)
+        with open(self.output_file, 'at') as outfile:
+                
+                outfile.write("Clearing history...\n\n")
+                
         self.steem.transfer(self.account_name, self.sbd_minimum, "SBD", account = self.account_name)
 
         ##Get the post id of this post
@@ -208,8 +247,18 @@ class Lottobot(object):
         self.current_longlotto_post_id = str(b[0].identifier)
 
         self.start_block = self.blockchain.get_current_block_num()
+
+        with open(self.output_file, 'at') as outfile:
+                
+                outfile.write("Post id of the longlotto post: " + str(self.current_longlotto_post_id) + "\n")
+                outfile.write("Initial checking block #: " + str(self.start_block) + "\n")
+                outfile.write("Longlotto is ready to begin!\n\n")
         
     def check_longlotto_entries(self):
+
+        with open(self.output_file, 'at') as outfile:
+                
+                outfile.write("Begin longlotto check...\n")
 
         self.end_block = self.blockchain.get_current_block_num()
 
@@ -243,10 +292,20 @@ class Lottobot(object):
 
                         if idtf = self.current_longlotto_post_id:
 
+                            with open(self.output_file, 'at') as outfile:
+                
+                                outfile.write("New longlotto resteemer found!\n")
+                                outfile.write("Name: " + str(jsn[1]['account']) + "\n\n")
+
                             self.longlotto_resteemers.append(jsn[1]['account'])
 
                     #if not, check if it was an upvote on our post
                     elif ops[0][0] == 'vote' and ops[0][1]['weight'] > 0 and '@' + self.account_name + "/" + ops[0][1]['permlink'] == self.current_longlotto_post_id:
+
+                        with open(self.output_file, 'at') as outfile:
+                
+                            outfile.write("New longlotto upvoter found!\n")
+                            outfile.write("Name: " + str(ops[0][1]['voter']) + "\n\n")
 
                         self.longlotto_upvoters.append(ops[0][1]['voter'])
 
@@ -255,6 +314,10 @@ class Lottobot(object):
         for f in followers:
 
             if f in self.longlotto_resteemers and f in self.longlotto_upvoters:
+
+                with open(self.output_file, 'at') as outfile:
+                
+                    outfile.write(str(f) + " is elligible for the longlotto! Adding...\n\n")
 
                 self.longlotto_entrants.append(f)
 
@@ -266,20 +329,100 @@ class Lottobot(object):
 
     def end_longlotto(self):
 
-        #choose a random winner from among the entrants list
-        total_entries = len(self.longlotto_entrants)
+        valid = False
 
-        self.longlotto_entrants.shuffle()
+        while not valid and len(self.longlotto_entrants) > 0:
+            
+            #choose a random winner from among the entrants list
+            total_entries = len(self.longlotto_entrants)
 
-        index = random.randint(0, total_entries - 1)
+            self.longlotto_entrants.shuffle()
 
-        #send the prize money to the winner
+            index = random.randint(0, total_entries - 1)
 
-        #TODO: Add a mechanism to check that we have the needed prize
-        # money
-        self.steem.transfer(self.longlotto_entrants[index], self.longlotto_prize, "SBD", account = self.account_name)
+            with open(self.output_file, 'at') as outfile:
+
+                outfile.write("Choosing longlotto winner...\n\n")
+
+            #send the prize money to the winner
+            try:
+                
+                self.steem.transfer(self.longlotto_entrants[index], self.longlotto_prize, "SBD", account = self.account_name, memo = "Congratulations! You were the winner of @" + str(self.account_name) + "'s weekly lottery number " + str(self.longlotto_number) + "! Your prize is " + str(self.longlotto_prize) + " SBD! Thanks for playing!")
+                self.longlotto_current_champ = self.longlotto_entrants[index]
+
+                with open(self.winners_file, 'at') as lwf:
+
+                    lwf.write(str(time.ctime()) + "\n")
+                    lwf.write("Longlotto #" + str(self.longlotto_number) + " winner:\n")
+                    lwf.write(str(self.longlotto_current_champ) + "\n")
+                    lwf.write("----------\n")
+                    lwf.write("----------\n")
+                
+            except Exception:
+
+                with open(self.output_file, 'at') as outfile:
+                    
+                    outfile.write("Failed to make transfer to longlotto winner @" + str(self.longlotto_entrants[index]) + "\n")
+                    outfile.write("Recording in log file and bypassing...\n\n")
+
+                with open(self.error_file, 'at') as f:
+
+                    f.write(str(time.ctime()) + ": \n")
+                    f.write("Failed to award longlotto prize.\n")
+                    f.write("Winner: " + str(self.longlotto_entrants[index]) + "\n")
+                    f.write("------------------------------\n\n")
+
+                self.longlotto_entrants.pop(index)
+
+            else:#Validate longlotto winner and break loop
+
+                valid = True
 
         #TODO: Record winner, add log output thru entire process
+        #TODO: Make a "Winner!" announcement post
+
+        #if the longlotto was valid
+        if len(self.longlotto_entrants > 0):
+
+            #announcement post
+            wtitle = "Winner of @" + str(self.account_name) + "'s Weekly Lottery #" + str(self.longlotto_number) ": " + str(self.longlotto_current_champ) + "!"
+            wbody = ""
+            wauthor = self.account_name
+            wtags = ["contest", "steemit", "steem", "lottobot", "winner"]
+
+            #try to make the post
+            try:
+
+                with open(self.output_file, 'at') as outfile:
+                    
+                    outfile.write("Making longlotto winner post for longlotto #" + str(self.longlotto_number) + "\n")
+            
+                self.steem.post(wtitle, wbody, author = wauthor, tags = wtags)
+
+            except:
+
+                with open(self.output_file, 'at') as outfile:
+                    
+                    outfile.write("Unable to make longlotto winning post!\n")
+                    outfile.write("Reporting to error file...\n\n")
+
+                with open(self.error_file, 'at') as f:
+
+                    f.write(str(time.ctime()) + "\n")
+                    f.write("Failed to make longlotto winning post!\n\n")
+                    f.write(" Title was..... " + str(wtitle) + "\n")
+                    f.write(" Tags were..... " + str(wtags) + "\n\n")
+                    f.write("BODY: \n")
+                    f.write(str(wbody) + "\n\n")
+                    f.write("------------------\n")
+            
+        #if it was invalid...
+        else:
+
+            with open(self.output_file, 'at') as outfile:
+
+                outfile.write("Longlotto #" +str(self.longlotto_number) + " is invalidated!\n")
+                outfile.write("No valid winner names found!\n\n")
 
         #Reset the values of the lottery
         self.longlotto_entrants = []#usernames who are eligible for the longlotto
