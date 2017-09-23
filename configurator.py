@@ -104,9 +104,12 @@ except FileNotFoundError:
     open(winlog, 'w').close()
     open(errlog, 'w').close()
 
-    #finally, also create the kill file & setup file
+    #finally, also create the kill file, setup file, & info files
     open(os.path.join('data', 'command'), 'w').close()
     open(os.path.join('data', 'setup'), 'w').close()
+    open(os.path.join('data', 'llstart'), 'w').close()
+    open(os.path.join('data', 'llend'), 'w').close()
+    open(os.path.join('data', 'prize'), 'w').close()
 
 ################################################################################
 ################################################################################

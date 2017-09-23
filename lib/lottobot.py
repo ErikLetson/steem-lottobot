@@ -57,6 +57,17 @@ class Lottobot(object):
         self.on = True
         self.run_next = True
 
+        #get the longlotto prize
+        try:
+            
+            with open(os.path.join('data', 'prize')) as p:
+
+                prize = int(p.readline())
+
+        except Exception:
+
+            prize = 25#default value
+
         #data
         self.urls = []
         self.next_urls = []#after we hit the 2hr mark, store urls for next lotto
@@ -73,9 +84,10 @@ class Lottobot(object):
 
         self.longlotto_number = 0#current longlotto (iterated every week at default)
         #self.longlotto_dividend = 68#the number that the check pass is divided by to see if it is time to decide the longlotto
-        self.longlotto_prize = 25#in SBD
+        self.longlotto_prize = prize#in SBD
         self.longlotto_ongoing = False
         self.current_longlotto_post_id = None
+        self.longlotto_current_champ = ""
 
         self.start_block = -1
         self.end_block = -1
@@ -196,17 +208,48 @@ class Lottobot(object):
             sf.write(str(self.lotto) + '\n')
             sf.write(str(self.check_pass))
 
+    def parse_post(self, postfile):
+        """
+        Parse the contents of a post file
+        according to Lottobot's simplistic
+        syntax
+        """
+
+        title = ""
+        tags = []
+        body = ""
+
+        #read from file
+        with open(postfile, 'r') as post:
+
+            title = post.readline()
+
+            #I should be ashamed...
+            tags.append(post.readline())
+            tags.append(post.readline())
+            tags.append(post.readline())
+            tags.append(post.readline())
+            tags.append(post.readline())
+
+            body = post.readline()
+
+        #format body & title
+        title = title.format(acct = str(self.account_name), llnum = str(self.longlotto_number), prize = str(self.longlotto_prize), champ = str(self.longlotto_current_champ))
+        body = body.format(acct = str(self.account_name), llnum = str(self.longlotto_number), prize = str(self.longlotto_prize), champ = str(self.longlotto_current_champ))
+
+        #return post
+        return [title, body, tags]
+        
     def post_longlotto(self):
 
-        #TODO:
-        # Define the contents of the title, body, author, and tags in the
-        # configurator.
+        #eventually allow you to set this path in the configurator
+        post = self.parse_post(os.path.join('data', 'llstart'))
 
-        ptitle = "Weekly @" + str(self.account_name) + " Special Lottery #" + str(self.longlotto_number) + "! (GRAND PRIZE OF " + str(self.longlotto_prize) + " SBD!)"
-        pbody = ""
+        ptitle = post[0]
+        pbody = post[1]
         pauthor = self.account_name
-        ptags = ["contest", "steemit", "steem", "lottobot", "money"]
-
+        ptags = post[2]
+        
         #try to make the post
         try:
 
@@ -238,7 +281,7 @@ class Lottobot(object):
         #clear history (piston shortcoming)
         with open(self.output_file, 'at') as outfile:
                 
-                outfile.write("Clearing history...\n\n")
+            outfile.write("Clearing history...\n\n")
                 
         self.steem.transfer(self.account_name, self.sbd_minimum, "SBD", account = self.account_name)
 
@@ -250,15 +293,15 @@ class Lottobot(object):
 
         with open(self.output_file, 'at') as outfile:
                 
-                outfile.write("Post id of the longlotto post: " + str(self.current_longlotto_post_id) + "\n")
-                outfile.write("Initial checking block #: " + str(self.start_block) + "\n")
-                outfile.write("Longlotto is ready to begin!\n\n")
+            outfile.write("Post id of the longlotto post: " + str(self.current_longlotto_post_id) + "\n")
+            outfile.write("Initial checking block #: " + str(self.start_block) + "\n")
+            outfile.write("Longlotto is ready to begin!\n\n")
         
     def check_longlotto_entries(self):
 
         with open(self.output_file, 'at') as outfile:
                 
-                outfile.write("Begin longlotto check...\n")
+            outfile.write("Begin longlotto check...\n")
 
         self.end_block = self.blockchain.get_current_block_num()
 
@@ -288,9 +331,9 @@ class Lottobot(object):
 
                         #if the author is our account and the post is our
                         #longlotto post, add to the resteemers list
-                        idtf = "@" + str(jsn[1]['author']) + "/" + str(jsn[1][permlink])
+                        idtf = "@" + str(jsn[1]['author']) + "/" + str(jsn[1]['permlink'])
 
-                        if idtf = self.current_longlotto_post_id:
+                        if idtf == self.current_longlotto_post_id:
 
                             with open(self.output_file, 'at') as outfile:
                 
@@ -336,7 +379,7 @@ class Lottobot(object):
             #choose a random winner from among the entrants list
             total_entries = len(self.longlotto_entrants)
 
-            self.longlotto_entrants.shuffle()
+            random.shuffle(self.longlotto_entrants)
 
             index = random.randint(0, total_entries - 1)
 
@@ -378,17 +421,16 @@ class Lottobot(object):
 
                 valid = True
 
-        #TODO: Record winner, add log output thru entire process
-        #TODO: Make a "Winner!" announcement post
-
         #if the longlotto was valid
-        if len(self.longlotto_entrants > 0):
+        if len(self.longlotto_entrants) > 0:
 
             #announcement post
-            wtitle = "Winner of @" + str(self.account_name) + "'s Weekly Lottery #" + str(self.longlotto_number) ": " + str(self.longlotto_current_champ) + "!"
-            wbody = ""
+            post = self.parse_post(os.path.join('data', 'llstart'))
+            
+            wtitle = post[0]
+            wbody = post[1]
             wauthor = self.account_name
-            wtags = ["contest", "steemit", "steem", "lottobot", "winner"]
+            wtags = post[2]
 
             #try to make the post
             try:
@@ -399,7 +441,7 @@ class Lottobot(object):
             
                 self.steem.post(wtitle, wbody, author = wauthor, tags = wtags)
 
-            except:
+            except Exception:
 
                 with open(self.output_file, 'at') as outfile:
                     
@@ -423,6 +465,8 @@ class Lottobot(object):
 
                 outfile.write("Longlotto #" +str(self.longlotto_number) + " is invalidated!\n")
                 outfile.write("No valid winner names found!\n\n")
+
+            #Do something else here
 
         #Reset the values of the lottery
         self.longlotto_entrants = []#usernames who are eligible for the longlotto
@@ -455,6 +499,13 @@ class Lottobot(object):
 
                 break
 
+            with open(self.output_file, 'at') as outfile:
+
+                outfile.write(str(time.ctime()) + "\n")
+                outfile.write("Begin pass #" + str(self.check_pass) + " of lottery #" + str(self.lotto) + "\n\n")
+                outfile.write("Remaining passes: " + str(900 - self.check_pass) + " (appx. end: " + time.strftime("%H:%M %p", time.localtime(((10 * self.lotto_length)- (10 * self.check_pass)) + time.time())) + ")\n")#make 900 settable in config
+                outfile.write("Current entrants: " + str(len(self.urls)) + "\n\n")
+
             #if the lottery is evenly divisible by the dividend, then a week has passed,
             #so we choose a weekly winner
             #if self.lotto % self.longlotto_dividend == 0 and self.check_pass == 0:
@@ -479,13 +530,6 @@ class Lottobot(object):
             if self.longlotto_ongoing:
 
                 self.check_longlotto_entries()
-
-            with open(self.output_file, 'at') as outfile:
-
-                outfile.write(str(time.ctime()) + "\n")
-                outfile.write("Begin pass #" + str(self.check_pass) + " of lottery #" + str(self.lotto) + "\n\n")
-                outfile.write("Remaining passes: " + str(900 - self.check_pass) + " (appx. end: " + time.strftime("%H:%M %p", time.localtime(((10 * self.lotto_length)- (10 * self.check_pass)) + time.time())) + ")\n")#make 900 settable in config
-                outfile.write("Current entrants: " + str(len(self.urls)) + "\n\n")
 
             #Check the history of the account we are associated with
             for item in self.account.history():
@@ -574,7 +618,7 @@ class Lottobot(object):
 
                                     try:
 
-                                        body = "Congratulations! This post won a bonus resteem from @" + str(self.account_name) + "! Everytime a post is entered into @" + str(self.account_name) + "'s lottery, there is a chance for it to win a bonus resteem, in addition to the jackpot of a 100% upvote from @" + str(self.account_name) + ". Do you have a post you would like to nominate for the lottery? Just send 0.1 SBD or STEEM to @" + str(self.account_name) + " and place the url of the post you want to nominate in the memo. Good luck!"
+                                        body = "Congratulations! This post won a bonus resteem from @" + str(self.account_name) + "! Everytime a post is entered into @" + str(self.account_name) + "'s lottery, there is a chance for it to win a bonus resteem, in addition to the jackpot of a 100% upvote from @" + str(self.account_name) + ". Do you have a post you would like to nominate for the lottery? Just send 0.1 SBD or STEEM to @" + str(self.account_name) + " and place the url of the post you want to nominate in the memo. Learn more by reading the [introductory post](https://steemit.com/introduceyourself/@lottobot/introducing-lottobot-are-you-ready-to-win-big)! Good luck!"
                                         
                                         self.steem.reply(post_id, body, author = self.account_name)
 
@@ -729,7 +773,7 @@ class Lottobot(object):
                 #make a comment
                 try:
 
-                    body = "Congratulations! This post has been awarded a 100% upvote by @" + str(self.account_name) + "! This post was the winner of lottery #" + str(self.lotto) + ", which had a total of " + str(total_entries) + " entries. @" + str(self.account_name) + " always has a lottery going on! If you would like to nominate a post for the current lottery, just send 0.1 SBD or STEEM to @" + str(self.account_name) + ", and include the url of the post you would like to nominate as a memo. Good luck!"
+                    body = "Congratulations! This post has been awarded a 100% upvote by @" + str(self.account_name) + "! This post was the winner of lottery #" + str(self.lotto) + ", which had a total of " + str(total_entries) + " entries. @" + str(self.account_name) + " always has a lottery going on! If you would like to nominate a post for the current lottery, just send 0.1 SBD or STEEM to @" + str(self.account_name) + ", and include the url of the post you would like to nominate as a memo. Learn more by reading the [introductory post](https://steemit.com/introduceyourself/@lottobot/introducing-lottobot-are-you-ready-to-win-big)! Good luck!"
 
                     self.steem.reply(str(self.urls[index]), body, author = self.account_name)
 

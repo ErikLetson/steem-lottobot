@@ -51,6 +51,31 @@ IMPORTANT NOTE: Lottobot cannot return currency it recieves. If you send it an i
 you include a malformed or incorrect memo, Lottobot will not be able to return your money! Be extra cautious
 and ensure that you enter all information correctly!
 
+ABOUT THE WEEKLY LOTTERY: Lottobot holds a weekly lottery in addition to its normal lottery. This weekly lottery
+is mostly automatic. The only thing you should have to interfere with is the posts that Lottobot makes as part
+of its weekly lottery. The contents of these posts are determined by the files `llstart` and `llend` in the `data`
+directory. The syntax of these two files is as follows:
+
+* The first line is the title of the post
+* The next 5 lines are the tags of the post
+* The final line is the body.
+
+In addition, you will also see certain terms enclosed in curly braces (`{}`). These are variables. Here is a list
+of the currently legal variables:
+
+* `{acct}` = The name of the account (no `@` symbol)
+* `{llnum}` = The current Weekly Lottery number
+* `{prize}` = The current prize amount
+* `{champ}` = The current Weekly Lottery champion (winner)
+
+To change the value of the prize offered by Lottobot for the weekly lottery, simply change the first line of the
+file `prize` in the `data` directory. This line should contain only a number. Note that this number is in SBD. If
+an incorrect value is entered here (a non-number, for example), Lottobot will default to using 25 SBD as the
+grand prize.
+
+NOTE: The weekly lottery is relatively new and untested. Some kinks may exist. Additionally, it is not the most
+friendly part of Lottobot's interface. Improvements are planned for the future.
+
 ## Contributions
 
 Contributions are always welcome! Be sure you read [the license](LICENSE.txt) and that you sign [the signoff](SIGNOFF.txt) file.
