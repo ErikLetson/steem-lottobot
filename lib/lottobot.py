@@ -360,7 +360,7 @@ class Lottobot(object):
 
                 with open(self.output_file, 'at') as outfile:
                 
-                    outfile.write(str(f) + " is elligible for the longlotto! Adding...\n\n")
+                    outfile.write(str(f) + " is eligible for the longlotto! Adding...\n\n")
 
                 self.longlotto_entrants.append(f)
 
