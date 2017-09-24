@@ -62,7 +62,7 @@ class Lottobot(object):
             
             with open(os.path.join('data', 'prize')) as p:
 
-                prize = int(p.readline())
+                prize = float(p.readline())
 
         except Exception:
 
@@ -369,6 +369,11 @@ class Lottobot(object):
 
         #update info for next pass
         self.start_block = self.end_block + 1
+
+        #Print some info about the longlotto
+        with open(self.output_file, 'at') as outfile:
+
+            outfile.write("Current longlotto entrants: " + str(len(self.longlotto_entrants)) + "\n\n")
 
     def end_longlotto(self):
 
@@ -729,6 +734,8 @@ class Lottobot(object):
                     with open(self.output_file, 'at') as outfile:
 
                         outfile.write("Successfully killed lottobot following lotto #" + str(self.lotto) + "!\n")
+
+                    self.remember_setup()
 
                     break
 
