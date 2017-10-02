@@ -530,7 +530,7 @@ class Lottobot(object):
 
             self.outstr += str(time.ctime()) + "\n"
             self.outstr += "Begin pass #" + str(self.check_pass) + " of lottery #" + str(self.lotto) + "\n\n"
-            self.outstr += "Remaining passes: " + str(900 - self.check_pass) + " (appx. end: " + time.strftime("%H:%M %p", time.localtime(((10 * self.lotto_length)- (10 * self.check_pass)) + time.time())) + ")\n"#make 900 settable in config
+            self.outstr += "Remaining passes: " + str(self.lotto_length - self.check_pass) + " (appx. end: " + time.strftime("%H:%M %p", time.localtime(((self.sleep_time * self.lotto_length)- (self.sleep_time * self.check_pass)) + time.time())) + ")\n"#make 900 settable in config
             self.outstr += "Current entrants: " + str(len(self.urls)) + "\n\n"
 
             #if the lottery is evenly divisible by the dividend, then a week has passed,
