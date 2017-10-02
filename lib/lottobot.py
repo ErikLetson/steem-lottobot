@@ -214,7 +214,7 @@ class Lottobot(object):
 
                         try:
 
-                            defaults[i] = ast.eval(defaults[i])
+                            defaults[i] = ast.literal_eval(defaults[i])
 
                         except Exception:
 
@@ -237,10 +237,10 @@ class Lottobot(object):
         with open(self.setup_path, 'w') as sf:
 
             sf.write(str(self.lotto) + '\n')
-            sf.write(str(self.check_pass))
+            sf.write(str(self.check_pass) + '\n')
 
             #record urls even if empty
-            sf.write(str(self.urls))
+            sf.write(str(self.urls) + '\n')
             sf.write(str(self.longlotto_entrants))
 
     def parse_post(self, postfile):
