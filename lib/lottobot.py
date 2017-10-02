@@ -81,6 +81,7 @@ class Lottobot(object):
         self.lotto_length = 900#total # of passes
         #self.holdover_threshold = 720#pass to carry over further entrants to next lotto
         self.holdover_threshold_passed = False
+        self.history_cleared = False
         self.sleep_time = 9#rough number of seconds to delay between passes
 
         self.longlotto_number = 0#current longlotto (iterated every week at default)
@@ -755,7 +756,7 @@ class Lottobot(object):
             self.check_pass += 1
 
             #if self.check_pass == self.holdover_threshold - 1:#last pass before carryover
-            if self.holdover_threshold_passed:
+            if self.holdover_threshold_passed and not self.history_cleared:
                 
                 self.outstr += "Beginning 'clear' transfer...\n"
 
@@ -778,6 +779,8 @@ class Lottobot(object):
                     self.errstr += "Failed to transfer to self.\n"
                     self.errstr += "----------\n"
                     self.errstr += "----------\n"
+
+                self.history_cleared = True
 
             if self.check_pass > self.lotto_length:#appx 2.5 hrs (default)
 
@@ -816,6 +819,7 @@ class Lottobot(object):
                     self.target_end_time = -1
                     self.lotto_length = 900#reset necessary
                     self.holdover_threshold_passed = False
+                    self.history_cleared = False
 
                     #begin next lottery
                     self.outstr += "Beginning lottery #" + str(self.lotto) + "\n\n"
