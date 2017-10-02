@@ -696,7 +696,7 @@ class Lottobot(object):
                             self.outstr += str(post_id) + " is valid!\n"
                             self.outstr += "Cash recieved: " + str(item['amount']) + "\n"
 
-                            if self.check_pass >= self.holdover_threshold:
+                            if not self.holdover_threshold_passed:
 
                                 self.next_urls.append(post_id)
 
