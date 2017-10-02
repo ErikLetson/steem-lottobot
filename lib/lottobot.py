@@ -550,17 +550,17 @@ class Lottobot(object):
             #so we choose a weekly winner
             #if self.lotto % self.longlotto_dividend == 0 and self.check_pass == 0:
 
-            #check the time. If it is Saturday at 3:00PM, start the longlotto
+            #check the time. If it is Monday at 3:00PM (USCT), start the longlotto
             tm = time.gmtime()#hour is index 3, weekday is index 5
             
-            if tm[6] == 5 and tm[3] == 15 and not self.longlotto_ongoing:
+            if tm[6] == 0 and tm[3] == 20 and not self.longlotto_ongoing:
 
                 self.longlotto_ongoing = True
             
                 self.post_longlotto()
 
             #check if the longlotto is over
-            elif tm[6] == 5 and tm[3] == 12 and self.longlotto_ongoing:
+            elif tm[6] == 0 and tm[3] == 17 and self.longlotto_ongoing:
 
                 self.longlotto_ongoing = False
 
