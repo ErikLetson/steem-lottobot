@@ -151,7 +151,10 @@ class Lottobot(object):
 
     def archive_output_log(self):
 
-        archive = ".archive-" + str(self.ctime())
+        t = str(time.ctime())
+        t = t.replace(":", "_")
+        
+        archive = "archive_" + t
 
         shutil.move(self.output_file, archive)
 
@@ -753,7 +756,17 @@ class Lottobot(object):
                 self.reward()
 
                 #archive logs
-                self.archive_output_log()
+                try:
+                    
+                    self.archive_output_log()
+
+                except Exception:
+
+                    with open(self.error_file, 'at') as f:
+
+                        f.write(str(time.ctime()) + "\n")
+                        f.write("Unable to archive log. \n")
+                        f.write("------------------------\n\n")
 
                 if self.run_next:
 
