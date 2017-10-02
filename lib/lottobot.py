@@ -105,7 +105,34 @@ class Lottobot(object):
         self.winstr = ""
 
         #run the bot
-        self.run()
+        #catch errors
+        try:
+            
+            self.run()
+
+        except Exception as e:
+
+            with open(self.error_file, 'at') as f:
+
+                f.write("##################################\n")
+                f.write("##################################\n")
+                f.write(str(time.ctime()) + '\n')
+                f.write("Lottobot failed! Error info: \n\n")
+                f.write(str(e) + "\n\n")
+                f.write("Lottobot will now exit...\n")
+                f.write("##################################\n")
+                f.write("##################################\n")
+
+            try:
+
+                self.remember_setup()
+
+            except Exception:
+
+                with open(self.error_file, 'at') as f:
+
+                f.write("Unable to save setup...\n\n")
+                f.write("---------------------------\n\n")
 
     def check_run_commands(self):
         """
