@@ -1,4 +1,4 @@
-import piston, os, time, random, ast
+import piston, os, time, random, ast, shutil
 from piston.blog import Blog
 
 _CONFIGPATH = os.path.join('data', 'config')
@@ -80,7 +80,7 @@ class Lottobot(object):
         self.check_pass = 0#iterated each time we check for transfers (resets after a winner)
         self.lotto_length = 900#total # of passes
         self.holdover_threshold = 720#pass to carry over further entrants to next lotto
-        self.sleep_time = 10#rough number of seconds to delay between passes
+        self.sleep_time = 9#rough number of seconds to delay between passes
 
         self.longlotto_number = 0#current longlotto (iterated every week at default)
         #self.longlotto_dividend = 68#the number that the check pass is divided by to see if it is time to decide the longlotto
@@ -88,6 +88,7 @@ class Lottobot(object):
         self.longlotto_ongoing = False
         self.current_longlotto_post_id = None
         self.longlotto_current_champ = ""
+        self.longlotto_delay = 10
 
         self.start_block = -1
         self.end_block = -1
@@ -148,6 +149,15 @@ class Lottobot(object):
         open(self.winners_file, 'w').close()
         open(self.error_file, 'w').close()
 
+    def archive_output_log(self):
+
+        archive = ".archive-" + str(self.ctime())
+
+        shutil.move(self.output_file, archive)
+
+        #remake log
+        open(self.output_file, 'w').close()
+
     def reward(self):
 
         try:
@@ -196,10 +206,31 @@ class Lottobot(object):
 
                         defaults[i] = defaults[i][0:len(defaults[i]) - 1]
 
-                    defaults[i] = int(defaults[i])
+                    try:
+                        
+                        defaults[i] = int(defaults[i])
+
+                    except Exception:
+
+                        try:
+
+                            defaults[i] = ast.eval(defaults[i])
+
+                        except Exception:
+
+                            with open(self.error_file, 'at') as f:
+
+                                f.write(str(time.ctime()) + "\n")
+                                f.write("Invalid data detected in setup file.\n")
+                                f.write("Data was: " + str(defaults[i]) + " at position " + str(i) + "\n")
+                                f.write("Ignoring...\n")
+                                f.write("----------------\n\n")
 
                 self.lotto = defaults.pop(0)
                 self.check_pass = defaults.pop(0)
+
+                self.urls = defaults.pop(0)
+                self.longlotto_entrants = defaults.pop(0)
 
     def remember_setup(self):
 
@@ -207,6 +238,10 @@ class Lottobot(object):
 
             sf.write(str(self.lotto) + '\n')
             sf.write(str(self.check_pass))
+
+            #record urls even if empty
+            sf.write(str(self.urls))
+            sf.write(str(self.longlotto_entrants))
 
     def parse_post(self, postfile):
         """
@@ -430,7 +465,7 @@ class Lottobot(object):
         if len(self.longlotto_entrants) > 0:
 
             #announcement post
-            post = self.parse_post(os.path.join('data', 'llstart'))
+            post = self.parse_post(os.path.join('data', 'llend'))
             
             wtitle = post[0]
             wbody = post[1]
@@ -534,7 +569,15 @@ class Lottobot(object):
             #check for longlotto entrants
             if self.longlotto_ongoing:
 
-                self.check_longlotto_entries()
+                if self.longlotto_delay > 0:
+
+                    self.longlotto_delay -= 1
+
+                else:
+
+                    self.longlotto_delay = 10
+
+                    self.check_longlotto_entries()
 
             #Check the history of the account we are associated with
             for item in self.account.history():
@@ -709,6 +752,9 @@ class Lottobot(object):
                 #amount to the 'associated' account
                 self.reward()
 
+                #archive logs
+                self.archive_output_log()
+
                 if self.run_next:
 
                     with open(self.output_file, 'at') as outfile:
@@ -719,9 +765,6 @@ class Lottobot(object):
                     self.lotto += 1
                     self.urls = self.next_urls
                     self.next_urls = []
-
-                    #check for weekly contest entrants
-                    ####TODO
 
                     #begin next lottery
                     with open(self.output_file, 'at') as outfile:
