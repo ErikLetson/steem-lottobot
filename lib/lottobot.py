@@ -99,6 +99,11 @@ class Lottobot(object):
         self.steem_minimum = 0
         self.sbd_minimum = 0.001#cannot be 0
 
+        #output strings
+        self.outstr = ""
+        self.errstr = ""
+        self.winstr = ""
+
         #run the bot
         self.run()
 
@@ -168,17 +173,13 @@ class Lottobot(object):
             self.steem.claim_reward_balance(account = self.account_name)
 
         except Exception:
-
-            with open(self.output_file, 'at') as outfile:
                 
-                outfile.write("Failed to withdraw reward balance. \n")
-                outfile.write("Writing to error log...\n")
-
-            with open(self.error_file, 'at') as f:
+            self.outstr += "Failed to withdraw reward balance. \n"
+            self.outstr += "Writing to error log...\n"
                 
-                f.write(str(time.ctime()) + ": \n")
-                f.write("Failed to claim reward balance. Perhaps there is none available?\n")
-                f.write("----------------------------\n")
+            self.errstr += str(time.ctime()) + ": \n"
+            self.errstr += "Failed to claim reward balance. Perhaps there is none available?\n"
+            self.errstr += "----------------------------\n"
 
         if self.associated_account != 'None':
 
@@ -291,35 +292,27 @@ class Lottobot(object):
         #try to make the post
         try:
 
-            with open(self.output_file, 'at') as outfile:
-                
-                outfile.write("Making longlotto post for longlotto #" + str(self.longlotto_number) + "\n")
+            self.outstr += "Making longlotto post for longlotto #" + str(self.longlotto_number) + "\n"
         
             self.steem.post(ptitle, pbody, author = pauthor, tags = ptags)
 
         except Exception:
 
-            with open(self.output_file, 'at') as outfile:
-                
-                outfile.write("WARNING! Failed to make longlotto post!\n")
-                outfile.write("Dumping to error log...\n\n")
+            self.outstr += "WARNING! Failed to make longlotto post!\n"
+            self.outstr += "Dumping to error log...\n\n"
 
-            with open(self.error_file, 'at') as f:
-                
-                f.write(str(time.ctime()) + ": \n")
-                f.write("Failed to make longlotto post!\n\n")
-                f.write(" Title was..... " + str(ptitle) + "\n")
-                f.write(" Tags were..... " + str(ptags) + "\n\n")
-                f.write("BODY: \n")
-                f.write(str(pbody) + "\n\n")
-                f.write("THE LONGLOTTO WILL NOT BE ABLE TO FUNCTION WITHOUT THIS POST!\n")
-                f.write("FIX IMMEDIATELY!!\n")
-                f.write("------------------\n")
+            self.errstr += str(time.ctime()) + ": \n"
+            self.errstr += "Failed to make longlotto post!\n\n"
+            self.errstr += " Title was..... " + str(ptitle) + "\n"
+            self.errstr += " Tags were..... " + str(ptags) + "\n\n"
+            self.errstr += "BODY: \n"
+            self.errstr += str(pbody) + "\n\n"
+            self.errstr += "THE LONGLOTTO WILL NOT BE ABLE TO FUNCTION WITHOUT THIS POST!\n"
+            self.errstr += "FIX IMMEDIATELY!!\n"
+            self.errstr += "------------------\n"
 
         #clear history (piston shortcoming)
-        with open(self.output_file, 'at') as outfile:
-                
-            outfile.write("Clearing history...\n\n")
+        self.outstr += "Clearing history...\n\n"
                 
         self.steem.transfer(self.account_name, self.sbd_minimum, "SBD", account = self.account_name)
 
@@ -329,17 +322,13 @@ class Lottobot(object):
 
         self.start_block = self.blockchain.get_current_block_num()
 
-        with open(self.output_file, 'at') as outfile:
-                
-            outfile.write("Post id of the longlotto post: " + str(self.current_longlotto_post_id) + "\n")
-            outfile.write("Initial checking block #: " + str(self.start_block) + "\n")
-            outfile.write("Longlotto is ready to begin!\n\n")
+        self.outstr += "Post id of the longlotto post: " + str(self.current_longlotto_post_id) + "\n"
+        self.outstr += "Initial checking block #: " + str(self.start_block) + "\n"
+        self.outstr += "Longlotto is ready to begin!\n\n"
         
     def check_longlotto_entries(self):
 
-        with open(self.output_file, 'at') as outfile:
-                
-            outfile.write("Begin longlotto check...\n")
+        self.outstr += "Begin longlotto check...\n"
 
         self.end_block = self.blockchain.get_current_block_num()
 
@@ -373,20 +362,16 @@ class Lottobot(object):
 
                         if idtf == self.current_longlotto_post_id:
 
-                            with open(self.output_file, 'at') as outfile:
-                
-                                outfile.write("New longlotto resteemer found!\n")
-                                outfile.write("Name: " + str(jsn[1]['account']) + "\n\n")
+                            self.outstr += "New longlotto resteemer found!\n"
+                            self.outstr += "Name: " + str(jsn[1]['account']) + "\n\n"
 
                             self.longlotto_resteemers.append(jsn[1]['account'])
 
                     #if not, check if it was an upvote on our post
                     elif ops[0][0] == 'vote' and ops[0][1]['weight'] > 0 and '@' + self.account_name + "/" + ops[0][1]['permlink'] == self.current_longlotto_post_id:
 
-                        with open(self.output_file, 'at') as outfile:
-                
-                            outfile.write("New longlotto upvoter found!\n")
-                            outfile.write("Name: " + str(ops[0][1]['voter']) + "\n\n")
+                        self.outstr += "New longlotto upvoter found!\n"
+                        self.outstr += "Name: " + str(ops[0][1]['voter']) + "\n\n"
 
                         self.longlotto_upvoters.append(ops[0][1]['voter'])
 
@@ -396,9 +381,7 @@ class Lottobot(object):
 
             if f in self.longlotto_resteemers and f in self.longlotto_upvoters:
 
-                with open(self.output_file, 'at') as outfile:
-                
-                    outfile.write(str(f) + " is eligible for the longlotto! Adding...\n\n")
+                self.outstr += str(f) + " is eligible for the longlotto! Adding...\n\n"
 
                 self.longlotto_entrants.append(f)
 
@@ -409,9 +392,7 @@ class Lottobot(object):
         self.start_block = self.end_block + 1
 
         #Print some info about the longlotto
-        with open(self.output_file, 'at') as outfile:
-
-            outfile.write("Current longlotto entrants: " + str(len(self.longlotto_entrants)) + "\n\n")
+        self.outstr += "Current longlotto entrants: " + str(len(self.longlotto_entrants)) + "\n\n"
 
     def end_longlotto(self):
 
@@ -426,9 +407,7 @@ class Lottobot(object):
 
             index = random.randint(0, total_entries - 1)
 
-            with open(self.output_file, 'at') as outfile:
-
-                outfile.write("Choosing longlotto winner...\n\n")
+            self.outstr += "Choosing longlotto winner...\n\n"
 
             #send the prize money to the winner
             try:
@@ -436,27 +415,21 @@ class Lottobot(object):
                 self.steem.transfer(self.longlotto_entrants[index], self.longlotto_prize, "SBD", account = self.account_name, memo = "Congratulations! You were the winner of @" + str(self.account_name) + "'s weekly lottery number " + str(self.longlotto_number) + "! Your prize is " + str(self.longlotto_prize) + " SBD! Thanks for playing!")
                 self.longlotto_current_champ = self.longlotto_entrants[index]
 
-                with open(self.winners_file, 'at') as lwf:
-
-                    lwf.write(str(time.ctime()) + "\n")
-                    lwf.write("Longlotto #" + str(self.longlotto_number) + " winner:\n")
-                    lwf.write(str(self.longlotto_current_champ) + "\n")
-                    lwf.write("----------\n")
-                    lwf.write("----------\n")
+                self.winstr += str(time.ctime()) + "\n"
+                self.winstr += "Longlotto #" + str(self.longlotto_number) + " winner:\n"
+                self.winstr += str(self.longlotto_current_champ) + "\n"
+                self.winstr += "----------\n"
+                self.winstr += "----------\n"
                 
             except Exception:
 
-                with open(self.output_file, 'at') as outfile:
-                    
-                    outfile.write("Failed to make transfer to longlotto winner @" + str(self.longlotto_entrants[index]) + "\n")
-                    outfile.write("Recording in log file and bypassing...\n\n")
+                self.outstr += "Failed to make transfer to longlotto winner @" + str(self.longlotto_entrants[index]) + "\n"
+                self.outstr += "Recording in log file and bypassing...\n\n"
 
-                with open(self.error_file, 'at') as f:
-
-                    f.write(str(time.ctime()) + ": \n")
-                    f.write("Failed to award longlotto prize.\n")
-                    f.write("Winner: " + str(self.longlotto_entrants[index]) + "\n")
-                    f.write("------------------------------\n\n")
+                self.errstr += str(time.ctime()) + ": \n"
+                self.errstr += "Failed to award longlotto prize.\n"
+                self.errstr += "Winner: " + str(self.longlotto_entrants[index]) + "\n"
+                self.errstr += "------------------------------\n\n"
 
                 self.longlotto_entrants.pop(index)
 
@@ -478,36 +451,28 @@ class Lottobot(object):
             #try to make the post
             try:
 
-                with open(self.output_file, 'at') as outfile:
-                    
-                    outfile.write("Making longlotto winner post for longlotto #" + str(self.longlotto_number) + "\n")
+                self.outstr += "Making longlotto winner post for longlotto #" + str(self.longlotto_number) + "\n"
             
                 self.steem.post(wtitle, wbody, author = wauthor, tags = wtags)
 
             except Exception:
 
-                with open(self.output_file, 'at') as outfile:
-                    
-                    outfile.write("Unable to make longlotto winning post!\n")
-                    outfile.write("Reporting to error file...\n\n")
+                self.outstr += "Unable to make longlotto winning post!\n"
+                self.outstr += "Reporting to error file...\n\n"
 
-                with open(self.error_file, 'at') as f:
-
-                    f.write(str(time.ctime()) + "\n")
-                    f.write("Failed to make longlotto winning post!\n\n")
-                    f.write(" Title was..... " + str(wtitle) + "\n")
-                    f.write(" Tags were..... " + str(wtags) + "\n\n")
-                    f.write("BODY: \n")
-                    f.write(str(wbody) + "\n\n")
-                    f.write("------------------\n")
+                self.errstr += str(time.ctime()) + "\n"
+                self.errstr += "Failed to make longlotto winning post!\n\n"
+                self.errstr += " Title was..... " + str(wtitle) + "\n"
+                self.errstr += " Tags were..... " + str(wtags) + "\n\n"
+                self.errstr += "BODY: \n"
+                self.errstr += str(wbody) + "\n\n"
+                self.errstr += "------------------\n"
             
         #if it was invalid...
         else:
 
-            with open(self.output_file, 'at') as outfile:
-
-                outfile.write("Longlotto #" +str(self.longlotto_number) + " is invalidated!\n")
-                outfile.write("No valid winner names found!\n\n")
+            self.outstr += "Longlotto #" +str(self.longlotto_number) + " is invalidated!\n"
+            self.outstr += "No valid winner names found!\n\n"
 
             #Do something else here
 
@@ -518,6 +483,29 @@ class Lottobot(object):
 
         self.start_block = -1
         self.end_block = -1
+
+    def write_to_logs(self):
+
+        if self.outstr != "":
+
+            with open(self.output_file, 'at') as outfile:
+                outfile.write(self.outstr + "\n")
+
+            self.outstr = ""
+
+        if self.errstr != "":
+
+            with open(self.error_file, 'at') as errfile:
+                errfile.write(self.errstr + "\n")
+
+            self.errstr = ""
+
+        if self.winstr != "":
+
+            with open(self.winners_file, 'at') as winfile:
+                winfile.write(self.winstr + "\n")
+
+            self.winstr = ""
         
     def run(self):
 
@@ -536,18 +524,14 @@ class Lottobot(object):
                 self.remember_setup()
 
                 #open file for output writing
-                with open(self.output_file, 'at') as outfile:
-
-                    outfile.write('Successfully killed lottobot!\n')
+                self.outstr += 'Successfully killed lottobot!\n'
 
                 break
 
-            with open(self.output_file, 'at') as outfile:
-
-                outfile.write(str(time.ctime()) + "\n")
-                outfile.write("Begin pass #" + str(self.check_pass) + " of lottery #" + str(self.lotto) + "\n\n")
-                outfile.write("Remaining passes: " + str(900 - self.check_pass) + " (appx. end: " + time.strftime("%H:%M %p", time.localtime(((10 * self.lotto_length)- (10 * self.check_pass)) + time.time())) + ")\n")#make 900 settable in config
-                outfile.write("Current entrants: " + str(len(self.urls)) + "\n\n")
+            self.outstr += str(time.ctime()) + "\n"
+            self.outstr += "Begin pass #" + str(self.check_pass) + " of lottery #" + str(self.lotto) + "\n\n"
+            self.outstr += "Remaining passes: " + str(900 - self.check_pass) + " (appx. end: " + time.strftime("%H:%M %p", time.localtime(((10 * self.lotto_length)- (10 * self.check_pass)) + time.time())) + ")\n"#make 900 settable in config
+            self.outstr += "Current entrants: " + str(len(self.urls)) + "\n\n"
 
             #if the lottery is evenly divisible by the dividend, then a week has passed,
             #so we choose a weekly winner
@@ -591,9 +575,7 @@ class Lottobot(object):
 
                     if item['type'] == 'transfer':
 
-                        with open(self.output_file, 'at') as outfile:
-
-                            outfile.write("Found transfer. Validating...\n")
+                        self.outstr += "Found transfer. Validating...\n"
 
                         #validate url
                         try:
@@ -610,52 +592,40 @@ class Lottobot(object):
                         #If an error is encountered, log it and abandon the url
                         except Exception:
 
-                            with open(self.output_file, 'at') as outfile:
+                            self.outstr += "Invalid url, post id, or cash amount" + "\n"
+                            self.outstr += "Memo recieved: " + item['memo'] + "\n"
+                            self.outstr += "Sender: " + item['from'] + "\n"
+                            self.outstr += "Amount recieved: " + item['amount'] + "\n"
+                            self.outstr += "Dumping entry data to log file...\n"
 
-                                outfile.write("Invalid url, post id, or cash amount" + "\n")
-                                outfile.write("Memo recieved: " + item['memo'] + "\n")
-                                outfile.write("Sender: " + item['from'] + "\n")
-                                outfile.write("Amount recieved: " + item['amount'] + "\n")
-                                outfile.write("Dumping entry data to log file...\n")
-
-                            with open(self.error_file, 'at') as f:#'a' for 'append'
-                                
-                                f.write(str(time.ctime()) + "\n")
-                                f.write(str(item) + '\n')
-                                f.write("----------\n")
-                                f.write("----------\n")
+                            self.errstr += str(time.ctime()) + "\n"
+                            self.errstr += str(item) + '\n'
+                            self.errstr += "----------\n"
+                            self.errstr += "----------\n"
                                 
                         #else, url is valid
                         else:
 
-                            with open(self.output_file, 'at') as outfile:
-                                
-                                outfile.write(str(post_id) + " is valid!\n")
-                                outfile.write("Cash recieved: " + str(item['amount']) + "\n")
+                            self.outstr += str(post_id) + " is valid!\n"
+                            self.outstr += "Cash recieved: " + str(item['amount']) + "\n"
 
                             if self.check_pass >= self.holdover_threshold:
 
                                 self.next_urls.append(post_id)
 
-                                with open(self.output_file, 'at') as outfile:
-
-                                    outfile.write('This post will be eligible for the next lottery\n\n')
+                                self.outstr += 'This post will be eligible for the next lottery\n\n'
 
                             else:
 
                                 self.urls.append(post_id)
 
-                                with open(self.output_file, 'at') as outfile:
-
-                                    outfile.write('This post is eligible for the current lottery\n\n')
+                                self.outstr += 'This post is eligible for the current lottery\n\n'
 
                             #resteem bonus chance
                             rs_chance = random.randint(0, 20)
 
-                            with open(self.output_file, 'at') as outfile:
-                                        
-                                outfile.write("Roll for bonus resteem!\n")
-                                outfile.write("Rolled a " + str(rs_chance) + "\n")
+                            self.outstr += "Roll for bonus resteem!\n"
+                            self.outstr += "Rolled a " + str(rs_chance) + "\n"
 
                             if rs_chance == random.randint(0, 20):
 
@@ -663,9 +633,7 @@ class Lottobot(object):
 
                                     self.steem.resteem(post_id, account = self.account_name)
 
-                                    with open(self.output_file, 'at') as outfile:
-                                        
-                                        outfile.write("Post " + str(post_id) + " wins a bonus resteem!\n")
+                                    self.outstr += "Post " + str(post_id) + " wins a bonus resteem!\n"
 
                                     try:
 
@@ -675,79 +643,59 @@ class Lottobot(object):
 
                                     except Exception:
 
-                                        with open(self.output_file, 'at') as outfile:
-
-                                            outfile.write("Failed to comment on resteemed post " + str(post_id) + "\n")
-                                            outfile.write("Aborting...\n")
-                                            outfile.write("Logging to error file...\n\n")
+                                        self.outstr += "Failed to comment on resteemed post " + str(post_id) + "\n"
+                                        self.outstr += "Aborting...\n"
+                                        self.outstr += "Logging to error file...\n\n"
 
                                         #log it
-                                        with open(self.error_file, 'at') as f:
-
-                                            f.write(str(time.ctime()) + "\n")
-                                            f.write("Failed to comment on resteemed post " + str(post_id) + "\n")
-                                            f.write("----------\n")
-                                            f.write("----------\n")
+                                        self.errstr += str(time.ctime()) + "\n"
+                                        self.errstr += "Failed to comment on resteemed post " + str(post_id) + "\n"
+                                        self.errstr += "----------\n"
+                                        self.errstr += "----------\n"
 
                                 except Exception:
 
-                                    with open(self.output_file, 'at') as outfile:
-
-                                        outfile.write("An error occured while trying to resteem " + str(post_id) + "\n")
-                                        outfile.write("Resteem failed\n")
-                                        outfile.write("Logging to error file...\n\n")
+                                    self.outstr += "An error occured while trying to resteem " + str(post_id) + "\n"
+                                    self.outstr += "Resteem failed\n"
+                                    self.outstr += "Logging to error file...\n\n"
 
                                     #log it
-                                    with open(self.error_file, 'at') as f:
+                                    self.errstr += str(time.ctime()) + "\n"
+                                    self.errstr += "Failed to resteem post " + str(post_id) + "\n"
+                                    self.errstr += "----------\n"
+                                    self.errstr += "----------\n"
 
-                                        f.write(str(time.ctime()) + "\n")
-                                        f.write("Failed to resteem post " + str(post_id) + "\n")
-                                        f.write("----------\n")
-                                        f.write("----------\n")
-
-            with open(self.output_file, 'at') as outfile:
-                
-                outfile.write("End pass #" + str(self.check_pass) + "\n\n")
+            self.outstr += "End pass #" + str(self.check_pass) + "\n\n"
             
             self.check_pass += 1
 
             if self.check_pass == self.holdover_threshold - 1:#last pass before carryover
 
-                with open(self.output_file, 'at') as outfile:
-
-                    outfile.write("Beginning 'clear' transfer...\n")
+                self.outstr += "Beginning 'clear' transfer...\n"
 
                 try:
                     
                     self.steem.transfer(self.account_name, self.sbd_minimum, "SBD", account = self.account_name)
 
-                    with open(self.output_file, 'at') as outfile:
-                        
-                        outfile.write("Lotto entrants cleared.\n")
-                        outfile.write("Entrants will now be added to upcoming lottery.\n")
-                        outfile.write("\n")
+                    self.outstr += "Lotto entrants cleared.\n"
+                    self.outstr += "Entrants will now be added to upcoming lottery.\n"
+                    self.outstr += "\n"
 
                 except Exception:
 
-                    with open(self.output_file, 'at') as outfile:
-
-                        outfile.write("Failed to transfer 'clear' ammount to self.\n")
-                        outfile.write("Aborting...\n")
-                        outfile.write("Logging to error file...\n\n")
+                    self.outstr += "Failed to transfer 'clear' ammount to self.\n"
+                    self.outstr += "Aborting...\n"
+                    self.outstr += "Logging to error file...\n\n"
 
                     #log it
-                    with open(self.error_file, 'at') as f:
-
-                        f.write(str(time.ctime()) + "\n")
-                        f.write("Failed to transfer to self.\n")
-                        f.write("----------\n")
-                        f.write("----------\n")
+                    self.errstr += str(time.ctime()) + "\n"
+                    self.errstr += "Failed to transfer to self.\n"
+                    self.errstr += "----------\n"
+                    self.errstr += "----------\n"
 
             if self.check_pass > self.lotto_length:#appx 2.5 hrs (default)
 
-                with open(self.output_file, 'at') as outfile:
-
-                    outfile.write("Choosing winner...\n")
+                self.outstr += "Choosing winner...\n"
 
                 self.choose_winner()
 
@@ -762,17 +710,16 @@ class Lottobot(object):
 
                 except Exception:
 
-                    with open(self.error_file, 'at') as f:
+                    self.outstr += "Unable to archive output log. \n"
+                    self.outstr += "Logging error... \n\n"
 
-                        f.write(str(time.ctime()) + "\n")
-                        f.write("Unable to archive log. \n")
-                        f.write("------------------------\n\n")
+                    self.errstr += str(time.ctime()) + "\n"
+                    self.errstr += "Unable to archive log. \n"
+                    self.errstr += "------------------------\n\n"
 
                 if self.run_next:
 
-                    with open(self.output_file, 'at') as outfile:
-
-                        outfile.write("Reseting...\n")
+                    self.outstr += "Reseting...\n"
 
                     self.check_pass = 0
                     self.lotto += 1
@@ -780,20 +727,19 @@ class Lottobot(object):
                     self.next_urls = []
 
                     #begin next lottery
-                    with open(self.output_file, 'at') as outfile:
-
-                        outfile.write("Beginning lottery #" + str(self.lotto) + "\n\n")
+                    self.outstr += "Beginning lottery #" + str(self.lotto) + "\n\n"
 
                 else:
 
                     #open file for output writing
-                    with open(self.output_file, 'at') as outfile:
-
-                        outfile.write("Successfully killed lottobot following lotto #" + str(self.lotto) + "!\n")
+                    self.outstr += "Successfully killed lottobot following lotto #" + str(self.lotto) + "!\n"
 
                     self.remember_setup()
 
                     break
+
+            #log everything
+            self.write_to_logs()
 
     def choose_winner(self):
 
@@ -819,19 +765,15 @@ class Lottobot(object):
                 
                 dat = self.steem.vote(self.urls[index], 100, self.account_name)
 
-                with open(self.output_file, 'at') as outfile:
+                self.outstr += "The winner is... " + str(self.urls[index]) + "\n\n"
 
-                    outfile.write("The winner is... " + str(self.urls[index]) + "\n\n")
-
-                with open(self.winners_file, 'at') as lwf:
-
-                    lwf.write(str(time.ctime()) + "\n")
-                    lwf.write("Lotto #" + str(self.lotto) + " winner:\n")
-                    lwf.write(str(self.urls[index]) + "\n")
-                    lwf.write("Data dump:\n")
-                    lwf.write(str(dat) + "\n")
-                    lwf.write("----------\n")
-                    lwf.write("----------\n")
+                self.winstr += str(time.ctime()) + "\n"
+                self.winstr += "Lotto #" + str(self.lotto) + " winner:\n"
+                self.winstr += str(self.urls[index]) + "\n"
+                self.winstr += "Data dump:\n"
+                self.winstr += str(dat) + "\n"
+                self.winstr += "----------\n"
+                self.winstr += "----------\n"
 
                 #make a comment
                 try:
@@ -842,29 +784,25 @@ class Lottobot(object):
 
                 except Exception:
 
-                    with open(self.output_file, 'at') as outfile:
-
-                        outfile.write("Failed to reply to winning post with a comment.\n")
-                        outfile.write("Body of comment was: " + body + "\n")
-                        outfile.write("Post id was: " + str(self.urls[index]) + "\n")
-                        outfile.write("Aborting comment...")
-                        outfile.write("Logging to error file...\n\n")
+                    self.outstr += "Failed to reply to winning post with a comment.\n"
+                    self.outstr += "Body of comment was: " + body + "\n"
+                    self.outstr += "Post id was: " + str(self.urls[index]) + "\n"
+                    self.outstr += "Aborting comment..."
+                    self.outstr += "Logging to error file...\n\n"
 
                     #log it
-                    with open(self.error_file, 'at') as f:
-
-                        f.write(str(time.ctime()) + "\n")
-                        f.write("Failed to comment on winning post " + str(self.urls[index]) + "\n")
-                        f.write("Body of comment was: " + body + "\n")
-                        f.write("----------\n")
-                        f.write("----------\n")
+                    self.errstr += str(time.ctime()) + "\n"
+                    self.errstr += "Failed to comment on winning post " + str(self.urls[index]) + "\n"
+                    self.errstr += "Body of comment was: " + body + "\n"
+                    self.errstr += "----------\n"
+                    self.errstr += "----------\n"
 
             except Exception:
 
                 with open(self.output_file, 'at') as outfile:
 
-                    outfile.write("Cannot upvote " + str(self.urls[index]) + "\n")
-                    outfile.write("Removing...\n\n")
+                    self.outstr += "Cannot upvote " + str(self.urls[index]) + "\n"
+                    self.outstr += "Removing...\n\n"
 
                 self.urls.pop(index)#pop takes an index
 
@@ -875,8 +813,6 @@ class Lottobot(object):
         #handle the issue of an invalid list of urls
         if len(self.urls) == 0:
 
-            with open(self.output_file, 'at') as outfile:
-
-                outfile.write("Lottery is invalidated!\n")
-                outfile.write("No URLs found!\n\n")
+            self.outstr += "Lottery is invalidated!\n"
+            self.outstr += "No URLs found!\n\n"
         
