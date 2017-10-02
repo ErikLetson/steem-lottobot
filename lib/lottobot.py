@@ -608,6 +608,7 @@ class Lottobot(object):
 
                 #open file for output writing
                 self.outstr += 'Successfully killed lottobot!\n'
+                self.write_to_logs()
 
                 break
 
