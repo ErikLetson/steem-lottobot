@@ -60,8 +60,8 @@ directory. The syntax of these two files is as follows:
 * The next 5 lines are the tags of the post
 * The final line is the body.
 
-In addition, you will also see certain terms enclosed in curly braces (`{}`). These are variables. Here is a list
-of the currently legal variables:
+In addition, there are certain terms enclosed in curly braces (`{}`) that can be used to insert variable data into
+the text of the posts. These are refered to here simply as 'variables'. Here is a list of currently legal variables:
 
 * `{acct}` = The name of the account (no `@` symbol)
 * `{llnum}` = The current Weekly Lottery number
