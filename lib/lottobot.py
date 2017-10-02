@@ -544,14 +544,21 @@ class Lottobot(object):
         #if this is a fresh loop
         if self.start_time == -1:
 
+            self.outstr += "Setting up times...\n"
+
             #set current time as start time
             self.start_time = time.time()
 
             #set the end time as 2.5 hrs from then
-            self.target_end_time = time.time() + (self.lotto_length * self.sleep_time)
+            self.target_end_time = time.time() + ((self.lotto_length - self.check_pass) * self.sleep_time)
+
+            self.outstr += "Start: " + str(time.ctime(self.start_time)) + "\n"
+            self.outstr += "Target: " + str(time.ctime(self.target_end_time)) + "\n\n"
 
         #else, readjust time as needed
-        elif (self.start_time + (self.lotto_length * self.sleep_time)) > self.target_end_time:
+        elif (time.time() + ((self.lotto_length - self.check_pass) * self.sleep_time)) > self.target_end_time:
+
+            self.outstr += "Readjusting...\n"
 
             mod = 1
             found = False
@@ -573,6 +580,10 @@ class Lottobot(object):
 
                 self.outstr += "Modifying # passes by -" + str(mod) + "\n"
 
+            else:
+
+                self.outstr += "No good times found...\n\n"
+
         #if we are less than 1/2 hour from the end of the lotto
         if self.target_end_time - time.time() <= 1800:
 
@@ -583,8 +594,6 @@ class Lottobot(object):
         self.setup_run()
 
         while self.on:
-
-            self.readjust_for_time()
 
             time.sleep(self.sleep_time)
 
@@ -625,6 +634,9 @@ class Lottobot(object):
                 self.longlotto_ongoing = False
 
                 self.end_longlotto()
+
+            #readjust if needed
+            self.readjust_for_time()
 
             #check for longlotto entrants
             if self.longlotto_ongoing:
@@ -793,6 +805,7 @@ class Lottobot(object):
 
                 if self.run_next:
 
+                    self.outstr += "Lottery concluded after " + str(self.lotto_length) + " passes. \n"
                     self.outstr += "Reseting...\n"
 
                     self.check_pass = 0
