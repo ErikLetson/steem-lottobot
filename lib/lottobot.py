@@ -79,7 +79,8 @@ class Lottobot(object):
         self.lotto = 0#current lottery (iterates after a winner)
         self.check_pass = 0#iterated each time we check for transfers (resets after a winner)
         self.lotto_length = 900#total # of passes
-        self.holdover_threshold = 720#pass to carry over further entrants to next lotto
+        #self.holdover_threshold = 720#pass to carry over further entrants to next lotto
+        self.holdover_threshold_passed = False
         self.sleep_time = 9#rough number of seconds to delay between passes
 
         self.longlotto_number = 0#current longlotto (iterated every week at default)
@@ -103,6 +104,10 @@ class Lottobot(object):
         self.outstr = ""
         self.errstr = ""
         self.winstr = ""
+
+        #time readjustment
+        self.start_time = -1
+        self.target_end_time = -1
 
         #run the bot
         #catch errors
@@ -131,8 +136,8 @@ class Lottobot(object):
 
                 with open(self.error_file, 'at') as f:
 
-                f.write("Unable to save setup...\n\n")
-                f.write("---------------------------\n\n")
+                    f.write("Unable to save setup...\n\n")
+                    f.write("---------------------------\n\n")
 
     def check_run_commands(self):
         """
@@ -533,12 +538,53 @@ class Lottobot(object):
                 winfile.write(self.winstr + "\n")
 
             self.winstr = ""
+
+    def readjust_for_time(self):
+
+        #if this is a fresh loop
+        if self.start_time == -1:
+
+            #set current time as start time
+            self.start_time = time.time()
+
+            #set the end time as 2.5 hrs from then
+            self.target_end_time = time.time() + (self.lotto_length * self.sleep_time)
+
+        #else, readjust time as needed
+        elif (self.start_time + (self.lotto_length * self.sleep_time)) > self.target_end_time:
+
+            mod = 1
+            found = False
+
+            #until we find a mod that brings us below the target, increment mod
+            while not found:
+
+                if self.start_time + ((self.lotto_length - mod) * self.sleep_time) < self.target_end_time:
+
+                    found = True
+
+                else:
+
+                    mod += 1
+
+            if found:
+
+                self.lotto_length -= mod
+
+                self.outstr += "Modifying # passes by -" + str(mod) + "\n"
+
+        #if we are less than 1/2 hour from the end of the lotto
+        if self.target_end_time - time.time() <= 1800:
+
+            self.holdover_threshold_passed = True
         
     def run(self):
 
         self.setup_run()
 
         while self.on:
+
+            self.readjust_for_time()
 
             time.sleep(self.sleep_time)
 
@@ -696,8 +742,9 @@ class Lottobot(object):
             
             self.check_pass += 1
 
-            if self.check_pass == self.holdover_threshold - 1:#last pass before carryover
-
+            #if self.check_pass == self.holdover_threshold - 1:#last pass before carryover
+            if self.holdover_threshold_passed:
+                
                 self.outstr += "Beginning 'clear' transfer...\n"
 
                 try:
@@ -752,6 +799,10 @@ class Lottobot(object):
                     self.lotto += 1
                     self.urls = self.next_urls
                     self.next_urls = []
+                    self.start_time = -1
+                    self.target_end_time = -1
+                    self.lotto_length = 900#reset necessary
+                    self.holdover_threshold_passed = False
 
                     #begin next lottery
                     self.outstr += "Beginning lottery #" + str(self.lotto) + "\n\n"
