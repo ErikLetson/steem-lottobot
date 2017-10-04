@@ -110,6 +110,7 @@ except FileNotFoundError:
     open(os.path.join('data', 'llstart'), 'w').close()
     open(os.path.join('data', 'llend'), 'w').close()
     open(os.path.join('data', 'prize'), 'w').close()
+    open(os.path.join('data', 'blacklist'), 'w').close()
 
 ################################################################################
 ################################################################################
@@ -136,13 +137,14 @@ while True:
         print("This program is the Lottobot configurator.")
         print("")
         print("The configurator is a simple command line program that allows you to customize Lottobot to your liking.")
-        print("It can be used to set the account name, Steem node, and WIF keys that Lottobot uses.")
+        print("It can be used to set the account name, Steem node, and WIF keys that Lottobot uses, among other things.")
         print("In order to use Lottobot, you should set the account name and add Posting and Memo private WIF keys that match the account name to Lottobot's key list.")
         print("For most users, it is recommended that you use the default node.")
         print("")
         print("Following are some commands that you can issue to the configurator:")
         print("")
         print("  a..........Change account name")
+        print("  b..........Add account names to the blacklist")
         print("  d..........Delete *all* WIF keys")
         print("  e..........Change path to error log")
         print("  h..........Display this help screen")
@@ -194,6 +196,107 @@ while True:
         print("Account name is set to " + str(new_name) + ".")
         print("")
 
+    #add account names to the longlotto blacklist
+    elif cmd == 'b':
+
+        print("")
+        print("==Edit Blacklist==")
+        print("")
+        print("Here you can add accounts to the weekly lottery blacklist")
+        print("Any account names on the blacklist will NOT be added as entrants for the weekly lottery, even if they meet the required conditions.")
+        print("To remove a name that is already on the blacklist, simply reenter it. You will be prompted to confirm its removal.")
+        print("")
+        print("NOTE: You should include the name of the account ONLY. DO NOT use the '@' prefix.")
+        print("")
+        
+        ba = ""
+        bl = []
+
+        #read the blacklist into the list
+        with open(os.path.join('data', 'blacklist'), 'r') as f:
+
+            for line in f.readlines():
+
+                if line[len(line) - 1] == '\n':
+
+                    line = line[0:len(line) - 1]
+
+                if line != "":
+
+                    bl.append(line)
+
+        while ba != "!":
+
+            ba = input("Enter an account name (enter '!' to quit) >>>")
+
+            print("")
+
+            if ba[0] == '@':
+
+                print("Enter the account name ONLY. No '@'")
+                print("")
+
+            elif ba == '!':
+
+                a = input("Are you done editing the blacklist> (y/n) >>>")
+                print("")
+
+                if a.lower != 'y':
+
+                    ba = ""
+                    print("OK, resuming...")
+                    print("")
+
+            elif ba in bl:
+
+                a = input("REALLY remove '" + ba + "' from the blacklist? (y/n) >>>")
+                print("")
+
+                if a.lower == 'y':
+
+                    print("Removing...")
+                    print("")
+
+                    bl.remove(ba)
+
+                    print("'" + ba + "' has been removed from the blacklist.")
+                    print("")
+
+                else:
+
+                    print("OK")
+                    print("")
+
+            else:
+
+                a = input("You entered '" + ba + "', is this correct? (y/n) >>>")
+                print("")
+
+                if a.lower == 'y':
+
+                    print("Adding '" + ba + "' to blacklist...")
+                    print("")
+
+                    bl.append(ba)
+
+                    print("'" + ba + "' has been blacklisted from the weekly lottery.")
+                    print("To undo this, enter '" + ba + "' again at the next prompt.")
+                    print("")
+
+                else:
+
+                    print("OK, '" + ba + "' has not been blacklisted.")
+                    print("")
+                
+        print("Writing blacklist to file...")
+        print("")
+
+        with open(os.path.join('data', 'blacklist'), 'at') as f:
+
+            for item in bl:
+
+                f.write(item + "\n")
+            
     #delete all wif keys
     elif cmd == 'd':
 

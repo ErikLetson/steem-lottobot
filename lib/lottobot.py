@@ -74,6 +74,9 @@ class Lottobot(object):
         self.longlotto_entrants = []#usernames who are eligible for the longlotto
         self.longlotto_resteemers = []#those who resteemed the longlotto post
         self.longlotto_upvoters = []#those who upvote the longlotto post
+
+        #blacklists
+        self.longlotto_blacklis = []
         
         #stats
         self.lotto = 0#current lottery (iterates after a winner)
