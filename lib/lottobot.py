@@ -89,7 +89,7 @@ class Lottobot(object):
 
                 if line != "":
 
-                    bl.append(line)
+                    self.longlotto_blacklist.append(line)
         
         #stats
         self.lotto = 0#current lottery (iterates after a winner)
@@ -428,7 +428,7 @@ class Lottobot(object):
         #list for entrants
         for f in followers:
 
-            if f in self.longlotto_resteemers and f in self.longlotto_upvoters:
+            if f in self.longlotto_resteemers and f in self.longlotto_upvoters and not f in self.longlotto_blacklist:
 
                 self.outstr += str(f) + " is eligible for the longlotto! Adding...\n\n"
 
