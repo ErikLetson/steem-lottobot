@@ -76,7 +76,20 @@ class Lottobot(object):
         self.longlotto_upvoters = []#those who upvote the longlotto post
 
         #blacklists
-        self.longlotto_blacklis = []
+        self.longlotto_blacklist = []
+
+        #get blacklist
+        with open(directory, 'blacklist') as blf:
+
+            for line in blf.readlines():
+
+                if line[len(line) - 1] == '\n':
+
+                    line = line[0:len(line) - 1]
+
+                if line != "":
+
+                    bl.append(line)
         
         #stats
         self.lotto = 0#current lottery (iterates after a winner)
@@ -85,7 +98,7 @@ class Lottobot(object):
         #self.holdover_threshold = 720#pass to carry over further entrants to next lotto
         self.holdover_threshold_passed = False
         self.history_cleared = False
-        self.sleep_time = 9#rough number of seconds to delay between passes
+        self.sleep_time = 10#rough number of seconds to delay between passes
 
         self.longlotto_number = 0#current longlotto (iterated every week at default)
         #self.longlotto_dividend = 68#the number that the check pass is divided by to see if it is time to decide the longlotto

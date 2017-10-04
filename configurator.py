@@ -238,7 +238,7 @@ while True:
 
             elif ba == '!':
 
-                a = input("Are you done editing the blacklist> (y/n) >>>")
+                a = input("Are you done editing the blacklist? (y/n) >>>")
                 print("")
 
                 if a.lower != 'y':
