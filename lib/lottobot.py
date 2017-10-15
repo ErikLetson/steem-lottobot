@@ -100,13 +100,14 @@ class Lottobot(object):
         self.history_cleared = False
         self.sleep_time = 10#rough number of seconds to delay between passes
 
-        self.longlotto_number = 0#current longlotto (iterated every week at default)
+        self.longlotto_number = 1#current longlotto (iterated every week at default)
         #self.longlotto_dividend = 68#the number that the check pass is divided by to see if it is time to decide the longlotto
         self.longlotto_prize = prize#in SBD
         self.longlotto_ongoing = False
         self.current_longlotto_post_id = None
         self.longlotto_current_champ = ""
         self.longlotto_delay = 10
+        self.longlotto_on = False#if true, a longlotto will start, if false, it wont
 
         self.start_block = -1
         self.end_block = -1
@@ -529,6 +530,7 @@ class Lottobot(object):
         self.longlotto_entrants = []#usernames who are eligible for the longlotto
         self.longlotto_resteemers = []#those who resteemed the longlotto post
         self.longlotto_upvoters = []
+        self.longlotto_number += 1
 
         self.start_block = -1
         self.end_block = -1
@@ -637,37 +639,39 @@ class Lottobot(object):
             #so we choose a weekly winner
             #if self.lotto % self.longlotto_dividend == 0 and self.check_pass == 0:
 
-            #check the time. If it is Monday at 3:00PM (USCT), start the longlotto
-            tm = time.gmtime()#hour is index 3, weekday is index 5
-            
-            if tm[6] == 0 and tm[3] == 20 and not self.longlotto_ongoing:
+            if self.longlotto_on:
+                
+                #check the time. If it is Monday at 3:00PM (USCT), start the longlotto
+                tm = time.gmtime()#hour is index 3, weekday is index 5
+                
+                if tm[6] == 0 and tm[3] == 20 and not self.longlotto_ongoing:
 
-                self.longlotto_ongoing = True
-            
-                self.post_longlotto()
+                    self.longlotto_ongoing = True
+                
+                    self.post_longlotto()
 
-            #check if the longlotto is over
-            elif tm[6] == 0 and tm[3] == 17 and self.longlotto_ongoing:
+                #check if the longlotto is over
+                elif tm[6] == 0 and tm[3] == 17 and self.longlotto_ongoing:
 
-                self.longlotto_ongoing = False
+                    self.longlotto_ongoing = False
 
-                self.end_longlotto()
+                    self.end_longlotto()
+
+                #check for longlotto entrants
+                if self.longlotto_ongoing:
+
+                    if self.longlotto_delay > 0:
+
+                        self.longlotto_delay -= 1
+
+                    else:
+
+                        self.longlotto_delay = 10
+
+                        self.check_longlotto_entries()
 
             #readjust if needed
             self.readjust_for_time()
-
-            #check for longlotto entrants
-            if self.longlotto_ongoing:
-
-                if self.longlotto_delay > 0:
-
-                    self.longlotto_delay -= 1
-
-                else:
-
-                    self.longlotto_delay = 10
-
-                    self.check_longlotto_entries()
 
             #Check the history of the account we are associated with
             for item in self.account.history():
