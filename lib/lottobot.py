@@ -79,7 +79,7 @@ class Lottobot(object):
         self.longlotto_blacklist = []
 
         #get blacklist
-        with open(directory, 'blacklist') as blf:
+        with open(os.path.join(directory, 'blacklist'), 'r') as blf:
 
             for line in blf.readlines():
 
