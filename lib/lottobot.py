@@ -60,7 +60,7 @@ class Lottobot(object):
         #get the longlotto prize
         try:
             
-            with open(os.path.join('data', 'prize')) as p:
+            with open(os.path.join('data', 'prize'), 'r') as p:
 
                 prize = float(p.readline())
 
@@ -79,7 +79,7 @@ class Lottobot(object):
         self.longlotto_blacklist = []
 
         #get blacklist
-        with open(os.path.join(directory, 'blacklist'), 'r') as blf:
+        with open(os.path.join('data', 'blacklist'), 'r') as blf:
 
             for line in blf.readlines():
 
