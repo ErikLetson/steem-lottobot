@@ -249,7 +249,7 @@ while True:
                 a = input("Are you done editing the blacklist? (y/n) >>>")
                 print("")
 
-                if a.lower != 'y':
+                if a.lower() != 'y':
 
                     ba = ""
                     print("OK, resuming...")
@@ -260,7 +260,7 @@ while True:
                 a = input("REALLY remove '" + ba + "' from the blacklist? (y/n) >>>")
                 print("")
 
-                if a.lower == 'y':
+                if a.lower() == 'y':
 
                     print("Removing...")
                     print("")
@@ -280,7 +280,7 @@ while True:
                 a = input("You entered '" + ba + "', is this correct? (y/n) >>>")
                 print("")
 
-                if a.lower == 'y':
+                if a.lower() == 'y':
 
                     print("Adding '" + ba + "' to blacklist...")
                     print("")
