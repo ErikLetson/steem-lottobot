@@ -110,6 +110,14 @@ except FileNotFoundError:
     open(os.path.join('data', 'llstart'), 'w').close()
     open(os.path.join('data', 'llend'), 'w').close()
     open(os.path.join('data', 'prize'), 'w').close()
+
+#make a blacklist
+try:
+
+    open(os.path.join('data', 'blacklist'), 'r').close()
+
+except FileNotFoundError:
+    
     open(os.path.join('data', 'blacklist'), 'w').close()
 
 ################################################################################
