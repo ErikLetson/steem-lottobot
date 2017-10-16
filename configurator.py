@@ -299,7 +299,7 @@ while True:
         print("Writing blacklist to file...")
         print("")
 
-        with open(os.path.join('data', 'blacklist'), 'at') as f:
+        with open(os.path.join('data', 'blacklist'), 'w') as f:
 
             for item in bl:
 
