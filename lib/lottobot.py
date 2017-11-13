@@ -127,6 +127,11 @@ class Lottobot(object):
         self.start_time = -1
         self.target_end_time = -1
 
+        #Empty lotto fallback vals
+        self.empty_start_block = -1
+        self.empty_end_block = -1
+        self.empty_started = False
+
         #run the bot
         #catch errors
         try:
@@ -368,7 +373,7 @@ class Lottobot(object):
 
         ##Get the post id of this post
         b = Blog(self.account_name, self.steem)
-        self.current_longlotto_post_id = str(b[0].identifier)
+        self.current_longlotto_post_id = str(b[0].identifier)#this is not ideal, to say the least
 
         self.start_block = self.blockchain.get_current_block_num()
 
@@ -607,7 +612,32 @@ class Lottobot(object):
         if self.target_end_time - time.time() <= 1800:
 
             self.holdover_threshold_passed = True
-        
+
+    def populate_empty_lotto(self):
+
+        """
+        Chooses random entrants if the lotto reaches
+        its end while no entrants are available.
+        """
+
+        self.empty_end_block = self.blockchain.get_current_block_num()
+
+        self.outstr += "Lotto is empty. Populating with recent posts...\n\n"
+
+        if self.empty_start_block >= 0:
+
+            for b in self.blockchain.blocks(start = self.empty_start_block, stop = self.empty_end_block):
+
+                for t in b['transactions']:
+
+                    for o in t['operations']:
+
+                        if o[0] == 'comment' and o[1]['parent_author'] == '':
+
+                            self.urls.append('@' + str(o[1]['author']) + '/' + str(o[1]['permlink']))
+
+                            self.outstr += "Found empty potential winner: @" + str(o[1]['author']) + "\n\n"
+
     def run(self):
 
         self.setup_run()
@@ -803,9 +833,20 @@ class Lottobot(object):
 
                 self.history_cleared = True
 
+            #if we are within 10 passes of the end, and we are empty, and the history hasnt been cleared, start the empty pass
+            if self.lotto_length - self.check_pass <= 10 and len(self.urls) == 0 and self.history_cleared and not self.empty_started:
+
+                self.empty_start_block = self.blockchain.get_current_block_num()
+
+                self.empty_started = True
+
             if self.check_pass > self.lotto_length:#appx 2.5 hrs (default)
 
                 self.outstr += "Choosing winner...\n"
+
+                if self.epmpty_started:
+
+                    self.populate_empty_lotto()
 
                 self.choose_winner()
 
@@ -841,6 +882,9 @@ class Lottobot(object):
                     self.lotto_length = 900#reset necessary
                     self.holdover_threshold_passed = False
                     self.history_cleared = False
+                    self.empty_start_block = -1
+                    self.empty_end_block = -1
+                    self.empty_started = False
 
                     #begin next lottery
                     self.outstr += "Beginning lottery #" + str(self.lotto) + "\n\n"
@@ -894,8 +938,14 @@ class Lottobot(object):
                 #make a comment
                 try:
 
-                    body = "Congratulations! This post has been awarded a 100% upvote by @" + str(self.account_name) + "! This post was the winner of lottery #" + str(self.lotto) + ", which had a total of " + str(total_entries) + " entries. @" + str(self.account_name) + " always has a lottery going on! If you would like to nominate a post for the current lottery, just send 0.1 SBD or STEEM to @" + str(self.account_name) + ", and include the url of the post you would like to nominate as a memo. Learn more by reading the [introductory post](https://steemit.com/introduceyourself/@lottobot/introducing-lottobot-are-you-ready-to-win-big)! Good luck!"
+                    if not self.empty_started:
+    
+                        body = "Congratulations! This post has been awarded a 100% upvote by @" + str(self.account_name) + "! This post was the winner of lottery #" + str(self.lotto) + ", which had a total of " + str(total_entries) + " entries. @" + str(self.account_name) + " always has a lottery going on! If you would like to nominate a post for the current lottery, just send 0.1 SBD or STEEM to @" + str(self.account_name) + ", and include the url of the post you would like to nominate as a memo. Learn more by reading the [introductory post](https://steemit.com/introduceyourself/@lottobot/introducing-lottobot-are-you-ready-to-win-big)! Good luck!"
 
+                    else:
+
+                        body = "Congratulations! This post has been awarded a 100% upvote by @" + str(self.account_name) + "! This post was selected from among all recent posts as the winner of lottery #" + str(self.lotto) + ", which had no valid entrants. You can win again by entering in @" + str(self.account_name) + "'s regular lottery! To nominate a post for the regular lottery, just send 0.1 SBD or STEEM to @" + str(self.account_name) + ", and include the url of the post you would like to nominate as a memo. Learn more by reading the [introductory post](https://steemit.com/introduceyourself/@lottobot/introducing-lottobot-are-you-ready-to-win-big)! Good luck!"
+                        
                     self.steem.reply(str(self.urls[index]), body, author = self.account_name)
 
                 except Exception:
