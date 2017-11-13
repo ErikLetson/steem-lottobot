@@ -746,7 +746,7 @@ class Lottobot(object):
                             self.outstr += str(post_id) + " is valid!\n"
                             self.outstr += "Cash recieved: " + str(item['amount']) + "\n"
 
-                            if not self.holdover_threshold_passed:
+                            if self.holdover_threshold_passed:
 
                                 self.next_urls.append(post_id)
 
@@ -844,7 +844,7 @@ class Lottobot(object):
 
                 self.outstr += "Choosing winner...\n"
 
-                if self.empty_started:
+                if self.empty_started and len(self.urls) == 0:
 
                     self.populate_empty_lotto()
 
