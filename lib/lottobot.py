@@ -844,7 +844,7 @@ class Lottobot(object):
 
                 self.outstr += "Choosing winner...\n"
 
-                if self.epmpty_started:
+                if self.empty_started:
 
                     self.populate_empty_lotto()
 
