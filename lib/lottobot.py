@@ -1,9 +1,10 @@
-import piston, os, time, random, ast, shutil
+import piston, os, time, random, ast, shutil, datetime
 from piston.blog import Blog
 
 _CONFIGPATH = os.path.join('data', 'config')
 _COMPATH = os.path.join('data', 'command')
 _SETUPPATH = os.path.join('data', 'setup')
+_POSTPATH = os.path.join('data', 'post_template')
 
 #make kill file if it does not exist
 #open(_KILLPATH, 'w').close()
@@ -118,6 +119,8 @@ class Lottobot(object):
         self.steem_minimum = 0
         self.sbd_minimum = 0.001#cannot be 0
 
+        self.most_recent_winner = ""
+
         #output strings
         self.outstr = ""
         self.errstr = ""
@@ -131,6 +134,17 @@ class Lottobot(object):
         self.empty_start_block = -1
         self.empty_end_block = -1
         self.empty_started = False
+
+        #daily info
+        self.daily_data = {
+            "num_lottos": 0,
+            "total_entrants": 0,
+            "total_winners": 0,
+            "valid_winners": 0,
+            "random_winners": 0,
+            "lottos": {}
+        }
+        self.purged = False
 
         #run the bot
         #catch errors
@@ -208,6 +222,20 @@ class Lottobot(object):
         open(self.output_file, 'w').close()
         open(self.winners_file, 'w').close()
         open(self.error_file, 'w').close()
+
+    def purge_daily_data(self):
+
+        self.daily_data = {
+            "num_lottos": 0,
+            "total_entrants": 0,
+            "total_winners": 0,
+            "valid_winners": 0,
+            "random_winners": 0,
+            "lottos": {}
+        }
+        self.purged = True
+
+        self.outstring += "Purged daily data.\n\n"
 
     def archive_output_log(self):
 
@@ -328,8 +356,8 @@ class Lottobot(object):
             body = post.readline()
 
         #format body & title
-        title = title.format(acct = str(self.account_name), llnum = str(self.longlotto_number), prize = str(self.longlotto_prize), champ = str(self.longlotto_current_champ))
-        body = body.format(acct = str(self.account_name), llnum = str(self.longlotto_number), prize = str(self.longlotto_prize), champ = str(self.longlotto_current_champ))
+        title = title.format(date = str(datetime.datetime.now().date()), acct = str(self.account_name), llnum = str(self.longlotto_number), prize = str(self.longlotto_prize), champ = str(self.longlotto_current_champ))
+        body = body.format(date = str(datetime.datetime.now().date()), acct = str(self.account_name), llnum = str(self.longlotto_number), prize = str(self.longlotto_prize), champ = str(self.longlotto_current_champ))
 
         #return post
         return [title, body, tags]
@@ -649,6 +677,14 @@ class Lottobot(object):
             #Check the runcoms
             self.check_run_commands()
 
+            #check if it is midnight UTC, and if so, purge daily data
+            t = time.gmtime()
+
+            if t[3] == 0 and not self.purged:
+                self.purge_daily_data()
+            elif t[3] != 0 and self.purged:
+                self.purged = False
+
             #if a kill command was detectected, end the loop
             if not self.on:
 
@@ -844,11 +880,26 @@ class Lottobot(object):
 
                 self.outstr += "Choosing winner...\n"
 
+                ents = len(self.urls)
+
                 if self.empty_started and len(self.urls) == 0:
 
                     self.populate_empty_lotto()
 
                 self.choose_winner()
+
+                self.daily_data["num_lottos"] += 1
+                self.daily_data["total_entrants"] += ents
+
+                if self.most_recent_winner != "":
+                    self.daily_data["total_winners"] += 1
+
+                self.daily_data["lottos"][str(self.lotto)] = {
+                    "start": time.strftime("%H:%M %p", self.start_time),
+                    "end": time.strftime("%H:%M %p", time.time()),
+                    "entrants": ents,
+                    "winner": self.most_recent_winner
+                }
 
                 #Withdraw any extant account rewards, then transfer a certain
                 #amount to the 'associated' account
@@ -926,7 +977,8 @@ class Lottobot(object):
                 dat = self.steem.vote(self.urls[index], 100, self.account_name)
 
                 self.outstr += "The winner is... " + str(self.urls[index]) + "\n\n"
-
+                self.most_recent_winner = str(self.urls[index])
+                
                 self.winstr += str(time.ctime()) + "\n"
                 self.winstr += "Lotto #" + str(self.lotto) + " winner:\n"
                 self.winstr += str(self.urls[index]) + "\n"
@@ -938,15 +990,23 @@ class Lottobot(object):
                 #make a comment
                 try:
 
+                    valid = True
+
                     if not self.empty_started:
     
                         body = "Congratulations! This post has been awarded a 100% upvote by @" + str(self.account_name) + "! This post was the winner of lottery #" + str(self.lotto) + ", which had a total of " + str(total_entries) + " entries. @" + str(self.account_name) + " always has a lottery going on! If you would like to nominate a post for the current lottery, just send 0.1 SBD or STEEM to @" + str(self.account_name) + ", and include the url of the post you would like to nominate as a memo. Learn more by reading the [introductory post](https://steemit.com/introduceyourself/@lottobot/introducing-lottobot-are-you-ready-to-win-big)! Good luck!"
-
+                        
                     else:
 
                         body = "Congratulations! This post has been awarded a 100% upvote by @" + str(self.account_name) + "! This post was selected from among all recent posts as the winner of lottery #" + str(self.lotto) + ", which had no valid entrants. You can win again by entering in @" + str(self.account_name) + "'s regular lottery! To nominate a post for the regular lottery, just send 0.1 SBD or STEEM to @" + str(self.account_name) + ", and include the url of the post you would like to nominate as a memo. Learn more by reading the [introductory post](https://steemit.com/introduceyourself/@lottobot/introducing-lottobot-are-you-ready-to-win-big)! Good luck!"
+                        valid = False
                         
                     self.steem.reply(str(self.urls[index]), body, author = self.account_name)
+
+                    if valid:
+                        self.daily_data["valid_winners"] += 1
+                    else:
+                        self.daily_data["random_winners"] += 1
 
                 except Exception:
 
@@ -981,4 +1041,6 @@ class Lottobot(object):
 
             self.outstr += "Lottery is invalidated!\n"
             self.outstr += "No URLs found!\n\n"
+
+            self.most_recent_winner = ""
         
