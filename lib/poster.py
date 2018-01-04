@@ -12,6 +12,22 @@ class Poster(object):
         self.master = master
         self.template = template
 
+    def postify_lottos(self, data):
+
+        chunk = "<br/>"
+
+        #order the numbers first
+        for lot in sorted(data):
+            
+            chunk += "<li># " + str(data)
+            chunk += " (from " + str(data["start"]) + " to " + str(data["end"]) + "):"
+            chunk += " Winner - " + str(data["winner"]) + ";"
+            chunk += " Total entrants - " + str(data["entrants"]) + "</li>
+
+        chunk += "<br/>"
+
+        return chunk
+
     def parse_post(self, postfile):
         """
         Parse the contents of a post file

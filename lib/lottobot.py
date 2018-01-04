@@ -897,7 +897,7 @@ class Lottobot(object):
                 self.daily_data["lottos"][str(self.lotto)] = {
                     "start": time.strftime("%H:%M %p", self.start_time),
                     "end": time.strftime("%H:%M %p", time.time()),
-                    "entrants": ents,
+                    "entrants": str(ents),
                     "winner": self.most_recent_winner
                 }
 
