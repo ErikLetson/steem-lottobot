@@ -5,7 +5,7 @@ from . import poster
 _CONFIGPATH = os.path.join('data', 'config')
 _COMPATH = os.path.join('data', 'command')
 _SETUPPATH = os.path.join('data', 'setup')
-_POSTPATH = os.path.join('data', 'post_template')
+#_POSTPATH = os.path.join('data', 'post_template')
 
 #make kill file if it does not exist
 #open(_KILLPATH, 'w').close()
@@ -684,11 +684,12 @@ class Lottobot(object):
             #check if it is midnight UTC, and if so, purge daily data & post update
             t = time.gmtime()
 
-            if t[5] == 0 and not self.purged:#3
+            if t[5] in range(0, 9) and not self.purged:#3
                 self.outstr += "Purging data and posting update...\n\n"
                 self.poster.post()
                 self.purge_daily_data()
             elif t[5] != 0 and self.purged:
+                self.outstr += "Reset purge flag...\n\n"
                 self.purged = False
 
             #if a kill command was detectected, end the loop

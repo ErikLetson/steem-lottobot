@@ -56,6 +56,12 @@ class Poster(object):
 
             body = post.readline()
 
+        #calc avg entrants (avoid division by 0)
+        try:
+            avg = int(self.master.daily_data["total_entrants"]) / int(self.master.daily_data["total_winners"])
+        except Exception:
+            avg = 0
+
         #format body & title
         title = title.format(
             date = str(datetime.datetime.now().date()),
@@ -69,7 +75,7 @@ class Poster(object):
             total_winners = str(self.master.daily_data["total_winners"]),
             valid_winners = str(self.master.daily_data["valid_winners"]),
             random_winners = str(self.master.daily_data["random_winners"]),
-            avg_entrants = str(int(self.master.daily_data["total_entrants"]) / int(self.master.daily_data["total_winners"])),
+            avg_entrants = str(avg),
             cur_lotto = str(self.master.lotto),
             cur_entrants = str(len(self.master.urls)),
             cur_endtime = time.strftime("%H:%M %p", time.localtime(((self.master.sleep_time * self.master.lotto_length)- (self.master.sleep_time * self.master.check_pass)) + time.time()))
@@ -86,7 +92,7 @@ class Poster(object):
             total_winners = str(self.master.daily_data["total_winners"]),
             valid_winners = str(self.master.daily_data["valid_winners"]),
             random_winners = str(self.master.daily_data["random_winners"]),
-            avg_entrants = str(int(self.master.daily_data["total_entrants"]) / int(self.master.daily_data["total_winners"])),
+            avg_entrants = str(avg),
             cur_lotto = str(self.master.lotto),            
             cur_entrants = str(len(self.master.urls)),
             cur_endtime = time.strftime("%H:%M %p", time.localtime(((self.master.sleep_time * self.master.lotto_length)- (self.master.sleep_time * self.master.check_pass)) + time.time()))
@@ -108,7 +114,7 @@ class Poster(object):
         Make a post automatically.
         """
 
-        post = self.parse_post(template)
+        post = self.parse_post(self.template)
 
         ptitle = post[0]
         pbody = post[1]
