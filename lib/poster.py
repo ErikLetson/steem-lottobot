@@ -68,7 +68,11 @@ class Poster(object):
             total_entrants = str(self.master.daily_data["total_entrants"]),
             total_winners = str(self.master.daily_data["total_winners"]),
             valid_winners = str(self.master.daily_data["valid_winners"]),
-            random_winners = str(self.master.daily_data["random_winners"])
+            random_winners = str(self.master.daily_data["random_winners"]),
+            avg_entrants = str(int(self.master.daily_data["total_entrants"]) / int(self.master.daily_data["total_winners"])),
+            cur_lotto = str(self.master.lotto),
+            cur_entrants = str(len(self.master.urls)),
+            cur_endtime = time.strftime("%H:%M %p", time.localtime(((self.master.sleep_time * self.master.lotto_length)- (self.master.sleep_time * self.master.check_pass)) + time.time()))
             )
         body = body.format(
             date = str(datetime.datetime.now().date()),
@@ -81,19 +85,23 @@ class Poster(object):
             total_entrants = str(self.master.daily_data["total_entrants"]),
             total_winners = str(self.master.daily_data["total_winners"]),
             valid_winners = str(self.master.daily_data["valid_winners"]),
-            random_winners = str(self.master.daily_data["random_winners"])
+            random_winners = str(self.master.daily_data["random_winners"]),
+            avg_entrants = str(int(self.master.daily_data["total_entrants"]) / int(self.master.daily_data["total_winners"])),
+            cur_lotto = str(self.master.lotto),            
+            cur_entrants = str(len(self.master.urls)),
+            cur_endtime = time.strftime("%H:%M %p", time.localtime(((self.master.sleep_time * self.master.lotto_length)- (self.master.sleep_time * self.master.check_pass)) + time.time()))
             )
 
         #return post
         return [title, body, tags]
 
-    def check(self):
-        """
-        Check if it is time to create a post. If it is,
-        do it.
-        """
-
-        if
+##    def check(self):
+##        """
+##        Check if it is time to create a post. If it is,
+##        do it.
+##        """
+##
+##        if
 
     def post(self):
         """
