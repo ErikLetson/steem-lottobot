@@ -685,6 +685,7 @@ class Lottobot(object):
             t = time.gmtime()
 
             if t[5] == 0 and not self.purged:#3
+                self.outstr += "Purging data and posting update...\n\n"
                 self.poster.post()
                 self.purge_daily_data()
             elif t[5] != 0 and self.purged:
