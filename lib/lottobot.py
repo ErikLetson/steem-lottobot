@@ -243,12 +243,11 @@ class Lottobot(object):
 
     def archive_output_log(self):
 
-        t = str(time.ctime())
-        t = t.replace(":", "_")
-        
-        archive = "archive_" + t
-
-        shutil.move(self.output_file, archive)
+        try:
+            shutil.move("archive", "archive.old")
+        except:
+            pass
+        shutil.move(self.output_file, "archive")
 
         #remake log
         open(self.output_file, 'w').close()
@@ -684,11 +683,11 @@ class Lottobot(object):
             #check if it is midnight UTC, and if so, purge daily data & post update
             t = time.gmtime()
 
-            if t[5] in range(0, 9) and not self.purged:#3
+            if t[3] == 0 and not self.purged:
                 self.outstr += "Purging data and posting update...\n\n"
                 self.poster.post()
                 self.purge_daily_data()
-            elif t[5] != 0 and self.purged:
+            elif t[3] != 0 and self.purged:
                 self.outstr += "Reset purge flag...\n\n"
                 self.purged = False
 
