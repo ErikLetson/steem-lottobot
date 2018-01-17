@@ -1,5 +1,6 @@
 import piston, os, time, random, ast, shutil, datetime
 from piston.blog import Blog
+from . import poster
 
 _CONFIGPATH = os.path.join('data', 'config')
 _COMPATH = os.path.join('data', 'command')
@@ -145,6 +146,9 @@ class Lottobot(object):
             "lottos": {}
         }
         self.purged = False
+
+        #poster object
+        self.poster = poster.Poster(self, os.path.join('data', 'update_post'))
 
         #run the bot
         #catch errors
@@ -677,10 +681,11 @@ class Lottobot(object):
             #Check the runcoms
             self.check_run_commands()
 
-            #check if it is midnight UTC, and if so, purge daily data
+            #check if it is midnight UTC, and if so, purge daily data & post update
             t = time.gmtime()
 
             if t[3] == 0 and not self.purged:
+                self.poster.post()
                 self.purge_daily_data()
             elif t[3] != 0 and self.purged:
                 self.purged = False

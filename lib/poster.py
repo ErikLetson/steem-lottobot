@@ -39,6 +39,9 @@ class Poster(object):
         tags = []
         body = ""
 
+        #formatted
+        lottos = self.postify_lottos(self.master.daily_data["lottos"])
+
         #read from file
         with open(postfile, 'r') as post:
 
@@ -59,13 +62,27 @@ class Poster(object):
             acct = str(self.master.account_name),
             llnum = str(self.master.longlotto_number),
             prize = str(self.master.longlotto_prize),
-            champ = str(self.master.longlotto_current_champ))
+            champ = str(self.master.longlotto_current_champ),
+            lotto_list = str(lottos),
+            num_lottos = str(self.master.daily_data["num_lottos"]),
+            total_entrants = str(self.master.daily_data["total_entrants"]),
+            total_winners = str(self.master.daily_data["total_winners"]),
+            valid_winners = str(self.master.daily_data["valid_winners"]),
+            random_winners = str(self.master.daily_data["random_winners"])
+            )
         body = body.format(
             date = str(datetime.datetime.now().date()),
             acct = str(self.master.account_name),
             llnum = str(self.master.longlotto_number),
             prize = str(self.master.longlotto_prize),
-            champ = str(self.master.longlotto_current_champ))
+            champ = str(self.master.longlotto_current_champ),
+            lotto_list = str(lottos),
+            num_lottos = str(self.master.daily_data["num_lottos"]),
+            total_entrants = str(self.master.daily_data["total_entrants"]),
+            total_winners = str(self.master.daily_data["total_winners"]),
+            valid_winners = str(self.master.daily_data["valid_winners"]),
+            random_winners = str(self.master.daily_data["random_winners"])
+            )
 
         #return post
         return [title, body, tags]
@@ -76,7 +93,7 @@ class Poster(object):
         do it.
         """
 
-        pass
+        if
 
     def post(self):
         """
