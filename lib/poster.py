@@ -26,6 +26,8 @@ class Poster(object):
 
         chunk += "<br/>"
 
+        #print(chunk)
+
         return chunk
 
     def parse_post(self, postfile):
@@ -78,7 +80,7 @@ class Poster(object):
             avg_entrants = str(avg),
             cur_lotto = str(self.master.lotto),
             cur_entrants = str(len(self.master.urls)),
-            cur_endtime = time.strftime("%H:%M %p", time.localtime(((self.master.sleep_time * self.master.lotto_length)- (self.master.sleep_time * self.master.check_pass)) + time.time()))
+            cur_endtime = str(time.ctime(self.master.target_end_time))
             )
         body = body.format(
             date = str(datetime.datetime.now().date()),
@@ -93,9 +95,9 @@ class Poster(object):
             valid_winners = str(self.master.daily_data["valid_winners"]),
             random_winners = str(self.master.daily_data["random_winners"]),
             avg_entrants = str(avg),
-            cur_lotto = str(self.master.lotto),            
+            cur_lotto = str(self.master.lotto),
             cur_entrants = str(len(self.master.urls)),
-            cur_endtime = time.strftime("%H:%M %p", time.localtime(((self.master.sleep_time * self.master.lotto_length)- (self.master.sleep_time * self.master.check_pass)) + time.time()))
+            cur_endtime = str(time.ctime(self.master.target_end_time))
             )
 
         #return post
@@ -121,4 +123,11 @@ class Poster(object):
         pauthor = self.master.account_name
         ptags = post[2]
 
-        #self.master.steem.post()
+        try:
+
+            self.master.steem.post(ptitle, pbody, author = pauthor, tags = ptags)
+
+        except Exception:
+
+            self.master.errstr += "FAILED TO POST UPDATE!\n\n"
+            #print("!!!!!!!!!!!!!!!!!!")

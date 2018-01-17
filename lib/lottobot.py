@@ -239,7 +239,7 @@ class Lottobot(object):
         }
         self.purged = True
 
-        self.outstring += "Purged daily data.\n\n"
+        self.outstr += "Purged daily data.\n\n"
 
     def archive_output_log(self):
 
