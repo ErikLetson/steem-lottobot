@@ -22,7 +22,7 @@ class Poster(object):
             chunk += "<li># " + str(data)
             chunk += " (from " + str(data["start"]) + " to " + str(data["end"]) + "):"
             chunk += " Winner - " + str(data["winner"]) + ";"
-            chunk += " Total entrants - " + str(data["entrants"]) + "</li>
+            chunk += " Total entrants - " + str(data["entrants"]) + "</li>"
 
         chunk += "<br/>"
 

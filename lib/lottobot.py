@@ -684,10 +684,10 @@ class Lottobot(object):
             #check if it is midnight UTC, and if so, purge daily data & post update
             t = time.gmtime()
 
-            if t[3] == 0 and not self.purged:
+            if t[5] == 0 and not self.purged:#3
                 self.poster.post()
                 self.purge_daily_data()
-            elif t[3] != 0 and self.purged:
+            elif t[5] != 0 and self.purged:
                 self.purged = False
 
             #if a kill command was detectected, end the loop
